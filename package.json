@@ -1,0 +1,16 @@
+{
+  "name": "My-Architect-Pro",
+  "version": "57.6",
+  "description": "Architect AI Prompt Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
