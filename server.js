@@ -1,4 +1,3 @@
-// server.js (핵심 로직 & 데이터 저장소)
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -7,7 +6,9 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// 1. 핵심 데이터 (여기에 숨김)
+// ==========================================================================
+// 1. DATA_SHEET (V58 전체 데이터 완벽 이식)
+// ==========================================================================
 const DATA_SHEET = {
     "country": [
         "South Korea (대한민국)", "USA / Americas (미주)", "Europe (유럽)", 
@@ -278,38 +279,199 @@ const DATA_SHEET = {
         "--ar 9:16 (Story)", "--ar 2:3 (Portrait)", "--ar 3:4 (Social)", "--ar 4:5 (Insta)", "--ar 1:2 (Tall)", 
         "--ar 1:1 (Square)", 
         "--ar 16:10", "--ar 1.85:1", "--ar 1.43:1 (IMAX)"
-    ]
+    ],
+    "sub": [] 
 };
 
+// ==========================================================================
+// 2. ORGANIC SCENARIOS (V58 시나리오 전체 완벽 이식)
+// ==========================================================================
+const ORGANIC_SCENARIOS = {
+    'heritage': { 
+        s5: ['Grand Gothic Architecture', 'Neo-Classical Masterpiece', 'Korean Traditional Hanok with modern twist'], 
+        s6: ['Aged Stone Texture with moss', 'Weathered Red Brick', 'Rough Granite and Dark Wood'], 
+        s9: ['Golden Hour with dramatic long shadows', 'Sunset creating silhouette'], 
+        s17: ['Volumetric Lighting', 'God Rays piercing through clouds', 'Cinematic Warm Lighting'], 
+        s16: ['Low angle looking up to emphasize scale'], 
+        s14: ['Cinematic Movie Still', 'Historical Documentary Style'],
+        s23: ['Intricate Carvings', 'Detailed Ornamentation'],
+        boost: 'epic scale, monumental, timeless beauty, 8k resolution' 
+    },
+    'modern': { 
+        s5: ['Contemporary Minimalist Architecture', 'Bauhaus Inspired Villa', 'International Style Skyscraper'], 
+        s6: ['Smooth Exposed Concrete', 'Seamless Floor-to-Ceiling Glass', 'White Stucco and Black Steel'], 
+        s9: ['High Noon with sharp shadows', 'Overcast soft daylight'], 
+        s17: ['Natural Global Illumination', 'Soft Ambient Occlusion', 'Clean Studio Lighting'], 
+        s16: ['Eye-level architectural photography', '2-Point Perspective'], 
+        s14: ['ArchDaily Featured Project', 'Dezeen Style Photography'],
+        s22: ['24mm Tilt-Shift Lens'], 
+        boost: 'ultra-clean, sharp edges, hyper-realistic, unreal engine 5 render'
+    },
+    'organic': { 
+        s5: ['Biophilic Parametric Design', 'Eco-friendly Earth House', 'Vertical Forest Architecture'], 
+        s6: ['Natural Timber Cladding', 'Bamboo and Raw Stone', 'Living Green Wall mixed with glass'], 
+        s19: ['Dense Tropical Forest surrounding', 'Lush Botanical Garden'], 
+        s17: ['Dappled Sunlight through trees', 'Soft Diffused Light'], 
+        s11: ['Serene', 'Healing atmosphere', 'Zen-like tranquility'], 
+        s8: ['Curvilinear forms', 'Fluid organic shapes'],
+        boost: 'harmony with nature, sustainable design, photorealistic vegetation'
+    },
+    'hitech': { 
+        s5: ['Futuristic Deconstructivism', 'Parametric High-Tech Facade', 'Zaha Hadid Style Fluidity'], 
+        s6: ['Brushed Titanium Panels', 'Perforated Aluminum Skin', 'Carbon Fiber and Smart Glass'], 
+        s17: ['Cold LED accents', 'Reflection on metallic surfaces', 'Crisp Studio Lighting'], 
+        s9: ['Blue Hour (Twilight)', 'Night with internal glow'],
+        s8: ['Dynamic cantilever', 'Anti-gravity floating form'],
+        s22: ['14mm Wide Angle Lens'], 
+        boost: 'cutting-edge technology, innovative structure, detailed engineering'
+    },
+    'night': { 
+        s9: ['Deep Midnight', 'Rainy Night'], 
+        s17: ['Neon City Lights reflecting on wet road', 'Cyberpunk Color Grading (Cyan & Pink)', 'Cinematic Bokeh'], 
+        s6: ['Wet Asphalt', 'Reflective Glass', 'Dark Steel'], 
+        s11: ['Moody', 'Noir Atmosphere', 'Mystery'], 
+        s20: ['Busy street with light trails', 'Rain-slicked pavement'], 
+        boost: 'high contrast, dramatic lighting, ray tracing, night photography'
+    },
+    'forest': { 
+        s2: ['Deep Forest', 'Mountain'], 
+        s19: ['Pine Trees', 'Ferns', 'Moss'], 
+        s10: ['Foggy', 'Misty', 'Rainy'], 
+        s17: ['Diffused', 'Gloomy', 'Cinematic'], 
+        s6: ['Dark Wood', 'Rough Stone', 'Corten Steel'], 
+        s11: ['Mysterious', 'Secluded', 'Quiet'],
+        s5: ['Cabin', 'Retreat', 'Tiny House']
+    },
+    'desert': { 
+        s2: ['Desert', 'Dune', 'Canyon'], 
+        s19: ['Cactus', 'Dry Grass', 'Rocks'], 
+        s10: ['Clear', 'Heat Haze'], 
+        s6: ['Rammed Earth', 'Sandstone', 'Terracotta'], 
+        s17: ['Hard Shadow', 'High Contrast', 'Warm'], 
+        s11: ['Arid', 'Minimalist', 'Solitude'],
+        s9: ['High Noon']
+    },
+    'snow': { 
+        s21: ['Winter'], 
+        s10: ['Snowing', 'Blizzard', 'Overcast'], 
+        s19: ['Snowfield', 'Frozen Lake', 'Conifer'], 
+        s17: ['Cold', 'Blue Tint', 'Soft'], 
+        s11: ['Cozy', 'Silent', 'Serene'], 
+        s6: ['Black Concrete', 'Burnt Wood', 'Glass'], 
+        s9: ['Morning', 'Daylight']
+    },
+    'ocean': { 
+        s2: ['Cliff', 'Coastal', 'Beachfront'], 
+        s19: ['Ocean View', 'Infinity Pool', 'Palm Trees'], 
+        s10: ['Sunny', 'Blue Sky'], 
+        s17: ['Bright', 'Sunny', 'Natural'], 
+        s5: ['Modern', 'Resort', 'Mediterranean'], 
+        s6: ['White Stucco', 'Glass', 'Travertine'], 
+        s16: ['Wide angle', 'Aerial']
+    },
+    'resort': { 
+        s3: ['15.숙박시설', 'Hotel', 'Resort'], 
+        s13: ['Relaxing', 'Leisure'], 
+        s17: ['Golden Hour', 'Warm', 'Pool Lighting'], 
+        s19: ['Swimming Pool', 'Tropical Garden', 'Cabana'], 
+        s11: ['Luxury', 'Exclusive', 'Vacation vibe'], 
+        s16: ['Eye-level', 'Drone View'],
+        boost: 'award winning hotel design, 5-star luxury, travel photography'
+    },
+    'cyber': { 
+        s1: ['Neo Tokyo', 'Hong Kong Backstreet', 'Cyber Seoul'], 
+        s5: ['Cyberpunk', 'Industrial'], 
+        s10: ['Heavy Rain', 'Acid Rain'], 
+        s17: ['Neon Sign', 'Laser', 'Pink and Cyan'], 
+        s12: ['High Density'], 
+        s6: ['Metal', 'Concrete', 'Plastic'],
+        s26: ['Motion Blur']
+    },
+    'ruins': { 
+        s24: ['Post-Apocalyptic', 'Abandoned', 'Decay'], 
+        s6: ['Rusted Metal', 'Broken Concrete', 'Mossy Stone'], 
+        s10: ['Cloudy', 'Gloomy'], 
+        s19: ['Overgrown', 'Weeds', 'Ivy'], 
+        s11: ['Sad', 'Lonely', 'Dark', 'Haunting'], 
+        s5: ['Brutalism', 'Industrial'],
+        s17: ['Low Light', 'Shadowy']
+    },
+    'space': { 
+        s1: ['Mars Colony', 'Moon Base', 'Orbital Station'], 
+        s5: ['Aerospace', 'High-Tech'], 
+        s2: ['Crater', 'Alien Landscape'], 
+        s9: ['Space Black', 'Starry'], 
+        s17: ['Starlight', 'Cold LED', 'Rim Light'], 
+        s10: ['No Atmosphere'], 
+        s6: ['Gold Foil', 'White Panel', 'Solar Panel'],
+        s15: ['Unreal Engine 5']
+    },
+    'underwater': { 
+        s1: ['Underwater City', 'Deep Sea Lab'], 
+        s2: ['Sea Bed', 'Coral Reef'], 
+        s5: ['Futuristic', 'Bubble Architecture'], 
+        s6: ['Reinforced Glass', 'Transparent'], 
+        s17: ['Caustics', 'God Rays', 'Blue Light'], 
+        s11: ['Mysterious', 'Fantasy', 'Submerged'],
+        s10: ['Clear Water']
+    } 
+};
 
-// 2. 데이터 제공 API (화면 그리기용)
+// API 1: 데이터 제공 (프론트엔드가 처음 켜질 때 가져감)
 app.get('/api/data', (req, res) => {
-    res.json(DATA_SHEET);
+    res.json({
+        dataSheet: DATA_SHEET,
+        scenarios: ORGANIC_SCENARIOS
+    });
 });
 
-// 3. 프롬프트 생성 API (핵심 기술)
+// API 2: 나노 바나나 프롬프트 생성 (핵심 로직)
 app.post('/api/generate', (req, res) => {
-    const v = req.body; // 클라이언트가 보낸 선택값들
+    const { choices, themeBoost } = req.body; 
 
-    // 서버 내부에서 프롬프트 조립 (사용자는 이 로직을 볼 수 없음)
-    const getVal = (key) => v[key] ? v[key].replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g, "").replace(/[()]/g, "").trim() : "";
+    // 값 정제 함수
+    const getV = (key) => {
+        if (!choices[key]) return "";
+        let val = choices[key];
+        return val.replace(/\(.*\)/, "").trim();
+    };
 
-    let mainSentence = `A ${getVal('s14') || 'Architectural view'} of a ${getVal('s5')} ${getVal('s3')} ${getVal('s4')}`;
-    let contextDesc = `designed with ${getVal('s6')} material and ${getVal('s8')} form, featuring ${getVal('s23')} details.`;
-    let locDesc = `The scene is located in ${getVal('s0')} ${getVal('s1')}, sited ${getVal('s2')}, surrounded by ${getVal('s19')}.`;
-    let atmosphere = `The weather is ${getVal('s10')} in ${getVal('s21')} season at ${getVal('s9')}. The atmosphere is ${getVal('s11')} with ${getVal('s17')} lighting.`;
-    
-    const qualityTags = [
-        "Best Quality", "Masterpiece", "8k Resolution", "Hyper Detailed", 
-        getVal('s15'), getVal('s22'), getVal('s16'), getVal('s18')
-    ].filter(t => t && t.trim() !== "").join(", ");
+    // 🍌 [Nano Banana 엔진 로직]
+    const subjectParts = [getV('s5'), getV('s3'), getV('s4'), getV('s8')].filter(Boolean);
+    const subject = subjectParts.join(" ");
 
-    let finalPrompt = `${mainSentence}, ${contextDesc} ${locDesc} ${atmosphere} \n\n[Details]: ${qualityTags}`;
-    finalPrompt = finalPrompt.replace(/\s+/g, ' ').replace(/\s,\s/g, ', ').replace(/\.\s\./g, '.').trim();
+    const matParts = [getV('s6'), getV('s23')].filter(Boolean);
+    const mat = matParts.join(" and ");
+
+    const envParts = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s20')].filter(Boolean);
+    const env = envParts.join(", specifically ");
+
+    const atmoParts = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean);
+    const atmosphere = atmoParts.join(", ");
+
+    const techParts = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean);
+    const tech = techParts.join(", ");
+
+    let finalPrompt = `Create a highly detailed, photorealistic architectural image of a ${subject}. `;
+
+    if (mat) finalPrompt += `The structure is constructed primarily of ${mat}. `;
+    if (env) finalPrompt += `It is situated in ${env}. `;
+    if (atmosphere) finalPrompt += `The scene captures the atmosphere of ${atmosphere}. `;
+    if (tech) finalPrompt += `The image should have the quality of ${tech}. `;
+
+    if (themeBoost) finalPrompt += `Ensure the image reflects ${themeBoost}. `;
+
+    finalPrompt += `Render in 8k resolution, sharp focus, cinematic lighting, and architectural photography style.`;
+
+    const ratioVal = getV('s18');
+    if (ratioVal) {
+        const ratioText = ratioVal.replace("--ar ", "").replace(" (Standard)", "");
+        finalPrompt += ` (Aspect Ratio: ${ratioText})`;
+    }
 
     res.json({ result: finalPrompt });
 });
 
 app.listen(port, () => {
-    console.log(`서버가 http://localhost:${port} 에서 돌아가고 있습니다!`);
+    console.log(`Server running on port ${port}`);
 });
