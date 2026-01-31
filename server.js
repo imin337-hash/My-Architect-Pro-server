@@ -240,7 +240,7 @@ const DATA_SHEET = {
         "talking (대화하는)", "laughing (웃는)", "arguing (말다툼하는)", "hugging (포옹하는)", "kissing (키스하는)", "holding hands (손잡고 있는)", "waving (손 흔드는)", "cheering (환호하는)", 
         "taking photos (사진 찍는)", "taking selfie (셀카 찍는)", "eating (먹는)", "drinking (마시는)", "shopping (쇼핑하는)", "working (일하는)", "selling (파는)", "playing music (연주하는)", "dancing (춤추는)", "painting (그림 그리는)", "walking dog (개 산책시키는)"
     ],
-    // 💎 [FIXED] 사용자가 요청한 기본값으로 데이터 시트 재정렬 (맨 앞이 기본값이 되도록 유도 가능하지만, 프리셋으로 강제함)
+    // 💎 [FIXED] Tech Specs - 고화질 기본값
     "rep": ["Hyper-realistic Photo (극사실 사진)", "Unreal Engine 5", "Architectural Photography", "Cinematic Still"],
     "engine": ["Unreal Engine 5.5", "V-Ray 6", "Midjourney V6.1", "Octane Render"],
     "view": ["Eye-level (눈높이)", "Low Angle", "Aerial View", "Drone Shot", "Isometric"],
@@ -249,10 +249,6 @@ const DATA_SHEET = {
     "light": ["Natural Sunlight", "Soft Diffused", "Neon Lights", "Cinematic Lighting", "Volumetric Fog", "God Rays"],
     "ratio": ["--ar 1:1 (Square)", "--ar 16:9", "--ar 4:3", "--ar 9:16"]
 };
-
-// ==========================================================================
-// 2. THEME PRESETS (사용자 요청 Tech Specs 기본값 적용)
-// ==========================================================================
 
 // 💎 모든 프리셋에 공통으로 적용될 Tech Specs (요청하신 사진 기준)
 const COMMON_TECH_SPECS = {
@@ -264,6 +260,9 @@ const COMMON_TECH_SPECS = {
     s18: "--ar 1:1 (Square)"
 };
 
+// ==========================================================================
+// 2. THEME PRESETS (15개 테마 + Tech Spec 고정)
+// ==========================================================================
 const THEME_PRESETS = {
     'heritage': [
         { 
@@ -358,7 +357,7 @@ const THEME_PRESETS = {
             s3: "1.단독주택", s4: "Detached House (단독주택)",
             boost: "mysterious atmosphere, secluded, nature photography, earthy tones"
         },
-        { // 💎 [NEW] Forest + Modern
+        { 
             ...COMMON_TECH_SPECS,
             s5: "Modern (모던)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)",
             s6: "Glass and Steel", s2: "mountain peak (산 정상)", s19: "Forest (숲)",
@@ -497,4 +496,3 @@ app.post('/api/generate', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-}
