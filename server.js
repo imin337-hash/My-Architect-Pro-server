@@ -129,7 +129,7 @@ const DATA_SHEET = {
         "CLT Timber (구조용 목재)", "Timber Batten (목재 루버)", "Bamboo (대나무)", "Rattan (라탄)", "Cork (코르크)", "Teak Wood (티크)", "Walnut Wood (월넛)", "Oak Wood (오크)", "Ipe Decking (이페 데크)", "Cedar Shingle (적삼목 슁글)", "Green Wall (수직 정원)", "Moss Wall (이끼 벽)", "Myceium Brick (균사체 벽돌)", "Hempcrete (헴프크리트)",
         "Titanium Panel (티타늄 패널)", "Carbon Fiber (카본 파이버)", "Fiberglass (유리섬유)", "Smart Glass (스마트 글라스)", "Dichroic Glass (다이크로익 유리)", "Dichroic Film (다이크로익 필름)", "Photovoltaic Glass (태양광 유리)", "Polycarbonate (폴리카보네이트)", "ETFE Pillow (ETFE 막)", "Tensile Fabric (인장 막)", "Perforated Metal (타공 금속)", "Wire Mesh (와이어 메쉬)", "Expanded Metal (익스펜디드 메탈)", "Stained Glass (스테인드 글라스)",
         "Lime Wash (라임 워시)", "Venetian Plaster (베네치안 플라스터)", "Tadelakt (타델락트)", "Liquid Metal Coating (액체 금속 코팅)", "3D Printed Concrete (3D 프린팅 콘크리트)", "Translucent Concrete (투과형 콘크리트)", "Acoustic Panel (흡음 패널)", "Felt Wall (펠트 벽)", "Rubber Flooring (고무 바닥재)"
-    ]
+    ],
     "floor": [
         "1st Floor (1층)", "2nd Floor (2층)", "3rd Floor (3층)", "4th Floor (4층)", "5th Floor (5층)", 
         "6th Floor (6층)", "7th Floor (7층)", "8th Floor (8층)", "9th Floor (9층)", 
