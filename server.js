@@ -1,13 +1,23 @@
-// server.js (핵심 로직 & 데이터 저장소)
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// 1. 핵심 데이터 (여기에 숨김)
+// ⚠️ [수정된 부분] public 폴더를 없애고, 현재 폴더(./)를 정적 경로로 설정
+app.use(express.static(path.join(__dirname, './')));
+
+// 루트 경로(/)로 접속했을 때 index.html을 강제로 보여줌
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ==================================================================
+// 📊 FULL DATA SHEET (생략 없음)
+// ==================================================================
 const DATA_SHEET = {
     "country": [
         "South Korea (대한민국)", "USA / Americas (미주)", "Europe (유럽)", 
@@ -281,35 +291,66 @@ const DATA_SHEET = {
     ]
 };
 
+// ==================================================================
+// 📡 API ENDPOINTS
+// ==================================================================
 
-// 2. 데이터 제공 API (화면 그리기용)
+// 1. 데이터 제공 API (프론트엔드 드롭박스 채우기용)
 app.get('/api/data', (req, res) => {
     res.json(DATA_SHEET);
 });
 
-// 3. 프롬프트 생성 API (핵심 기술)
+// 2. 🍌 구글 나노바나나(Gemini) 서술형 프롬프트 생성 API (핵심)
 app.post('/api/generate', (req, res) => {
     const v = req.body; // 클라이언트가 보낸 선택값들
 
-    // 서버 내부에서 프롬프트 조립 (사용자는 이 로직을 볼 수 없음)
-    const getVal = (key) => v[key] ? v[key].replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g, "").replace(/[()]/g, "").trim() : "";
+    // 데이터 정제 함수 (한글 제거 및 공백 정리)
+    const getVal = (key) => v[key] ? v[key].replace(/\(.*\)/, "").trim() : "";
 
-    let mainSentence = `A ${getVal('s14') || 'Architectural view'} of a ${getVal('s5')} ${getVal('s3')} ${getVal('s4')}`;
-    let contextDesc = `designed with ${getVal('s6')} material and ${getVal('s8')} form, featuring ${getVal('s23')} details.`;
-    let locDesc = `The scene is located in ${getVal('s0')} ${getVal('s1')}, sited ${getVal('s2')}, surrounded by ${getVal('s19')}.`;
-    let atmosphere = `The weather is ${getVal('s10')} in ${getVal('s21')} season at ${getVal('s9')}. The atmosphere is ${getVal('s11')} with ${getVal('s17')} lighting.`;
+    // ---------------------------------------------------------
+    // 🍌 프롬프트 생성 로직 (Gemini Optimized)
+    // ---------------------------------------------------------
     
-    const qualityTags = [
-        "Best Quality", "Masterpiece", "8k Resolution", "Hyper Detailed", 
-        getVal('s15'), getVal('s22'), getVal('s16'), getVal('s18')
-    ].filter(t => t && t.trim() !== "").join(", ");
+    // (A) Main Subject (주어)
+    const subjectParts = [getVal('s5'), getVal('s3'), getVal('s4'), getVal('s8')].filter(Boolean);
+    const subject = subjectParts.join(" ");
+    
+    // (B) Material & Detail (재질 및 디테일)
+    const mat = [getVal('s6'), getVal('s23')].filter(Boolean).join(" and ");
 
-    let finalPrompt = `${mainSentence}, ${contextDesc} ${locDesc} ${atmosphere} \n\n[Details]: ${qualityTags}`;
-    finalPrompt = finalPrompt.replace(/\s+/g, ' ').replace(/\s,\s/g, ', ').replace(/\.\s\./g, '.').trim();
+    // (C) Environment (환경)
+    const envParts = [getVal('s0'), getVal('s1'), getVal('s2'), getVal('s19'), getVal('s20')].filter(Boolean);
+    const env = envParts.join(", specifically ");
+
+    // (D) Lighting, Mood & Weather (조명/날씨)
+    const atmosphere = [getVal('s9'), getVal('s10'), getVal('s21'), getVal('s17'), getVal('s11')].filter(Boolean).join(", ");
+
+    // (E) Technical Specs (카메라/렌더링)
+    const tech = [getVal('s14'), getVal('s15'), getVal('s16'), getVal('s22'), getVal('s26')].filter(Boolean).join(", ");
+
+    // 🔥 최종 문장 조립 (Google Imagen 3 / Gemini 서술형 스타일)
+    // "Create a [Style] image of..." 형태로 명령조로 시작하는 것이 가장 좋습니다.
+    
+    let finalPrompt = `Create a highly detailed, photorealistic architectural image of a ${subject || "modern building"}. `;
+    
+    if(mat) finalPrompt += `The structure is constructed primarily of ${mat}. `;
+    if(env) finalPrompt += `It is situated in ${env}. `;
+    if(atmosphere) finalPrompt += `The scene captures the atmosphere of ${atmosphere}. `;
+    if(tech) finalPrompt += `The image should have the quality of ${tech}. `;
+    
+    // 고퀄리티 태그
+    finalPrompt += `Render in 8k resolution, sharp focus, cinematic lighting, and architectural photography style.`;
+
+    // 화면비 정보 (텍스트로 힌트 추가)
+    if (v['s18']) {
+        const ratioText = v['s18'].replace("--ar ", "").replace(" (Standard)", ""); 
+        finalPrompt += ` (Aspect Ratio: ${ratioText})`;
+    }
 
     res.json({ result: finalPrompt });
 });
 
+// 서버 실행
 app.listen(port, () => {
-    console.log(`서버가 http://localhost:${port} 에서 돌아가고 있습니다!`);
+    console.log(`🍌 ARCHITOOLS PRO 서버가 포트 ${port}에서 실행 중입니다.`);
 });
