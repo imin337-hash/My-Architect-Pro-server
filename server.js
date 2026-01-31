@@ -7,9 +7,12 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================================================
-// 1. DATA_SHEET (V58 + New Density Options)
+// 1. DATA_SHEET (UI 렌더링을 위한 전체 데이터 풀)
 // ==========================================================================
 const DATA_SHEET = {
+    "config": {
+        "masters": [] 
+    },
     "country": [
         "South Korea (대한민국)", "USA / Americas (미주)", "Europe (유럽)", 
         "Asia / Middle East (아시아/중동)", "Nature / Wild (대자연/오지)", "Sci-Fi / Space (우주/미래)"
@@ -83,214 +86,36 @@ const DATA_SHEET = {
         "underground (지하)", "treehouse canopy (나무 위)", "private island (개인 섬)", "tropical atoll (열대 산호섬)", 
         "meteor crater (운석 구덩이)", "lunar crater (달 분화구)", "mars canyon (화성 협곡)", "space station module (우주 정거장)", "golf course view (골프장 뷰)", "adjacent to park (공원 인접)"
     ],
-"usage_mapping": {
-        "1.단독주택": [
-            "Detached House (단독주택)", 
-            "Multi-unit House (다중주택/하숙)", 
-            "Multi-household House (다가구주택/원룸)", 
-            "Official Residence (공관)"
-        ],
-        "2.공동주택": [
-            "Apartment Complex (아파트 단지)", 
-            "Row House (연립주택/빌라 4층이하)", 
-            "Multi-family House (다세대주택/빌라)", 
-            "Dormitory (기숙사)"
-        ],
-        "3.제1종근린생활시설": [
-            "Supermarket (슈퍼마켓/소매점)", 
-            "Convenience Store (편의점)", 
-            "Bakery (제과점)", 
-            "Cafe/Tea House (휴게음식점)", 
-            "Hair Salon (미용원)", 
-            "Bathhouse (목욕장)", 
-            "Laundry Shop (세탁소)", 
-            "Medical Clinic (의원)", 
-            "Dental Clinic (치과의원)", 
-            "Oriental Medicine Clinic (한의원)", 
-            "Community Center (마을회관)", 
-            "Police Sub-station (파출소)", 
-            "Fire Station (소방서)", 
-            "Post Office (우체국)", 
-            "Public Library (공공도서관)"
-        ],
-        "4.제2종근린생활시설": [
-            "General Restaurant (일반음식점)", 
-            "Small Theater (소극장/공연장)", 
-            "Religious Assembly (작은 교회/성당)", 
-            "Academy/Hagwon (학원)", 
-            "PC Room (PC방)", 
-            "Billiards Hall (당구장)", 
-            "Real Estate Agency (부동산중개소)", 
-            "General Office (일반사무소)", 
-            "Karaoke/Noraebang (노래연습장)", 
-            "Screen Golf Range (스크린골프장)", 
-            "Fitness Center (체력단련장)", 
-            "Gosiwon (고시원/다중생활시설)"
-        ],
-        "5.문화및집회시설": [
-            "Concert Hall (대형 공연장)", 
-            "Opera House (오페라 하우스)", 
-            "Wedding Hall (예식장)", 
-            "Convention Center (회의장/컨벤션)", 
-            "Racecourse (경마장)", 
-            "Art Gallery (미술관)", 
-            "Museum (박물관)", 
-            "Science Museum (과학관)", 
-            "Zoo (동물원)", 
-            "Botanical Garden (식물원)", 
-            "Aquarium (수족관)"
-        ],
-        "6.종교시설": [
-            "Large Church (대형 교회)", 
-            "Cathedral (성당)", 
-            "Buddhist Temple (사찰)", 
-            "Religious Shrine (제실/사당)", 
-            "Enshrining Hall (봉안당)"
-        ],
-        "7.판매시설": [
-            "Wholesale Market (도매시장)", 
-            "Traditional Market (전통시장)", 
-            "Department Store (백화점)", 
-            "Shopping Mall (쇼핑센터)", 
-            "Large Hypermarket (대형마트)"
-        ],
-        "8.운수시설": [
-            "Bus Terminal (버스터미널)", 
-            "Railway Station (철도역)", 
-            "Subway Station (지하철역)", 
-            "Airport Terminal (공항 터미널)", 
-            "Ferry Terminal (여객부두)", 
-            "Logistics Warehouse (물류창고/터미널)"
-        ],
-        "9.의료시설": [
-            "General Hospital (종합병원)", 
-            "University Hospital (대학병원)", 
-            "Nursing Hospital (요양병원)", 
-            "Mental Hospital (정신병원)", 
-            "Isolation Hospital (격리병원)"
-        ],
-        "10.교육연구시설": [
-            "Kindergarten (유치원)", 
-            "Elementary School (초등학교)", 
-            "High School (중/고등학교)", 
-            "University Campus (대학교)", 
-            "Training Institute (연수원)", 
-            "Research Center (연구소)", 
-            "Large Library (대형 도서관)"
-        ],
-        "11.노유자시설": [
-            "Daycare Center (어린이집)", 
-            "Orphanage (아동복지시설)", 
-            "Nursing Home (노인요양시설)", 
-            "Senior Welfare Center (노인복지관)", 
-            "Social Welfare Center (사회복지관)"
-        ],
-        "12.수련시설": [
-            "Youth Training Center (청소년수련관)", 
-            "Youth Hostel (유스호스텔)", 
-            "Training Camp (수련원/캠프)"
-        ],
-        "13.운동시설": [
-            "Indoor Gymnasium (실내체육관)", 
-            "Large Stadium (경기장/스타디움)", 
-            "Swimming Pool (수영장)", 
-            "Bowling Alley (볼링장)", 
-            "Tennis Court (테니스장)"
-        ],
-        "14.업무시설": [
-            "City Hall (시청/구청)", 
-            "Police Headquarters (경찰서 본서)", 
-            "Tax Office (세무서)", 
-            "Office Skyscraper (고층 오피스 빌딩)", 
-            "Company Headquarters (사옥)", 
-            "Officetel (오피스텔)"
-        ],
-        "15.숙박시설": [
-            "Luxury Hotel (관광호텔)", 
-            "Business Hotel (비즈니스호텔)", 
-            "Resort Condominium (콘도/리조트)", 
-            "Hanok Hotel (한옥 호텔)", 
-            "Hostel (호스텔)"
-        ],
-        "16.위락시설": [
-            "Nightclub (나이트클럽/유흥주점)", 
-            "Casino (카지노)", 
-            "Amusement Park (유원지 시설)", 
-            "Dance Hall (무도장)"
-        ],
-        "17.공장": [
-            "General Factory (일반 공장)", 
-            "Manufacturing Plant (제조 공장)", 
-            "Food Processing Plant (식품 공장)", 
-            "Knowledge Industry Center (지식산업센터/아파트형공장)"
-        ],
-        "18.창고시설": [
-            "Large Warehouse (일반창고)", 
-            "Cold Storage (냉동/냉장창고)", 
-            "Logistics Center (물류센터)", 
-            "Container Yard (컨테이너 야적장)"
-        ],
-        "19.위험물저장및처리": [
-            "Gas Station (주유소)", 
-            "LPG Charging Station (LPG 충전소)", 
-            "Hydrogen Station (수소충전소)", 
-            "Oil Storage Tank (유류 저장소)", 
-            "Chemical Plant (화학 공장)"
-        ],
-        "20.자동차관련시설": [
-            "Parking Tower (주차타워/빌딩)", 
-            "Car Wash Center (대형 세차장)", 
-            "Car Repair Shop (정비공장)", 
-            "Junkyard (폐차장)", 
-            "Driving School (운전학원)"
-        ],
-        "21.동물및식물관련시설": [
-            "Livestock Barn (축사)", 
-            "Slaughterhouse (도축장)", 
-            "Large Greenhouse (대형 온실)", 
-            "Vertical Farm (스마트팜/수직농장)"
-        ],
-        "22.자원순환관련시설": [
-            "Sewage Treatment Plant (하수처리장)", 
-            "Recycling Center (고물상/재활용센터)", 
-            "Waste Incinerator (쓰레기 소각장)"
-        ],
-        "23.교정및군사시설": [
-            "Prison (교도소)", 
-            "Detention Center (구치소)", 
-            "Military Barracks (군부대 막사)", 
-            "Military Bunker (군사 벙커)"
-        ],
-        "24.방송통신시설": [
-            "Broadcasting Station (방송국)", 
-            "Radio Station (라디오 방송국)", 
-            "Data Center (데이터센터/IDC)", 
-            "Telecom Tower Building (통신국)"
-        ],
-        "25.발전시설": [
-            "Power Plant (화력/원자력 발전소)", 
-            "Solar Power Plant (태양광 발전소)", 
-            "Wind Farm (풍력 발전 단지)"
-        ],
-        "26.묘지관련시설": [
-            "Crematorium (화장장)", 
-            "Ossuary (납골당/봉안당)", 
-            "Cemetery Chapel (묘지 예배당)"
-        ],
-        "27.관광휴게시설": [
-            "Outdoor Amphitheater (야외 음악당)", 
-            "Observatory Tower (전망 타워)", 
-            "Highway Rest Area (고속도로 휴게소)"
-        ],
-        "28.장례시설": [
-            "Funeral Home (장례식장)", 
-            "Pet Funeral Hall (동물 장례식장)"
-        ],
-        "29.야영장시설": [
-            "Camping Site (일반 야영장)", 
-            "Auto Camping Site (자동차 야영장)", 
-            "Glamping Site (글램핑장)"
-        ]
+    "usage_mapping": {
+        "1.단독주택": ["Detached House (단독주택)", "Multi-unit House (다중주택/하숙)", "Multi-household House (다가구주택/원룸)", "Official Residence (공관)"],
+        "2.공동주택": ["Apartment Complex (아파트 단지)", "Row House (연립주택/빌라 4층이하)", "Multi-family House (다세대주택/빌라)", "Dormitory (기숙사)"],
+        "3.제1종근린생활시설": ["Supermarket (슈퍼마켓/소매점)", "Convenience Store (편의점)", "Bakery (제과점)", "Cafe/Tea House (휴게음식점)", "Hair Salon (미용원)", "Bathhouse (목욕장)", "Laundry Shop (세탁소)", "Medical Clinic (의원)", "Dental Clinic (치과의원)", "Oriental Medicine Clinic (한의원)", "Community Center (마을회관)", "Police Sub-station (파출소)", "Fire Station (소방서)", "Post Office (우체국)", "Public Library (공공도서관)"],
+        "4.제2종근린생활시설": ["General Restaurant (일반음식점)", "Small Theater (소극장/공연장)", "Religious Assembly (작은 교회/성당)", "Academy/Hagwon (학원)", "PC Room (PC방)", "Billiards Hall (당구장)", "Real Estate Agency (부동산중개소)", "General Office (일반사무소)", "Karaoke/Noraebang (노래연습장)", "Screen Golf Range (스크린골프장)", "Fitness Center (체력단련장)", "Gosiwon (고시원/다중생활시설)"],
+        "5.문화및집회시설": ["Concert Hall (대형 공연장)", "Opera House (오페라 하우스)", "Wedding Hall (예식장)", "Convention Center (회의장/컨벤션)", "Racecourse (경마장)", "Art Gallery (미술관)", "Museum (박물관)", "Science Museum (과학관)", "Zoo (동물원)", "Botanical Garden (식물원)", "Aquarium (수족관)"],
+        "6.종교시설": ["Large Church (대형 교회)", "Cathedral (성당)", "Buddhist Temple (사찰)", "Religious Shrine (제실/사당)", "Enshrining Hall (봉안당)"],
+        "7.판매시설": ["Wholesale Market (도매시장)", "Traditional Market (전통시장)", "Department Store (백화점)", "Shopping Mall (쇼핑센터)", "Large Hypermarket (대형마트)"],
+        "8.운수시설": ["Bus Terminal (버스터미널)", "Railway Station (철도역)", "Subway Station (지하철역)", "Airport Terminal (공항 터미널)", "Ferry Terminal (여객부두)", "Logistics Warehouse (물류창고/터미널)"],
+        "9.의료시설": ["General Hospital (종합병원)", "University Hospital (대학병원)", "Nursing Hospital (요양병원)", "Mental Hospital (정신병원)", "Isolation Hospital (격리병원)"],
+        "10.교육연구시설": ["Kindergarten (유치원)", "Elementary School (초등학교)", "High School (중/고등학교)", "University Campus (대학교)", "Training Institute (연수원)", "Research Center (연구소)", "Large Library (대형 도서관)"],
+        "11.노유자시설": ["Daycare Center (어린이집)", "Orphanage (아동복지시설)", "Nursing Home (노인요양시설)", "Senior Welfare Center (노인복지관)", "Social Welfare Center (사회복지관)"],
+        "12.수련시설": ["Youth Training Center (청소년수련관)", "Youth Hostel (유스호스텔)", "Training Camp (수련원/캠프)"],
+        "13.운동시설": ["Indoor Gymnasium (실내체육관)", "Large Stadium (경기장/스타디움)", "Swimming Pool (수영장)", "Bowling Alley (볼링장)", "Tennis Court (테니스장)"],
+        "14.업무시설": ["City Hall (시청/구청)", "Police Headquarters (경찰서 본서)", "Tax Office (세무서)", "Office Skyscraper (고층 오피스 빌딩)", "Company Headquarters (사옥)", "Officetel (오피스텔)"],
+        "15.숙박시설": ["Luxury Hotel (관광호텔)", "Business Hotel (비즈니스호텔)", "Resort Condominium (콘도/리조트)", "Hanok Hotel (한옥 호텔)", "Hostel (호스텔)"],
+        "16.위락시설": ["Nightclub (나이트클럽/유흥주점)", "Casino (카지노)", "Amusement Park (유원지 시설)", "Dance Hall (무도장)"],
+        "17.공장": ["General Factory (일반 공장)", "Manufacturing Plant (제조 공장)", "Food Processing Plant (식품 공장)", "Knowledge Industry Center (지식산업센터/아파트형공장)"],
+        "18.창고시설": ["Large Warehouse (일반창고)", "Cold Storage (냉동/냉장창고)", "Logistics Center (물류센터)", "Container Yard (컨테이너 야적장)"],
+        "19.위험물저장및처리": ["Gas Station (주유소)", "LPG Charging Station (LPG 충전소)", "Hydrogen Station (수소충전소)", "Oil Storage Tank (유류 저장소)", "Chemical Plant (화학 공장)"],
+        "20.자동차관련시설": ["Parking Tower (주차타워/빌딩)", "Car Wash Center (대형 세차장)", "Car Repair Shop (정비공장)", "Junkyard (폐차장)", "Driving School (운전학원)"],
+        "21.동물및식물관련시설": ["Livestock Barn (축사)", "Slaughterhouse (도축장)", "Large Greenhouse (대형 온실)", "Vertical Farm (스마트팜/수직농장)"],
+        "22.자원순환관련시설": ["Sewage Treatment Plant (하수처리장)", "Recycling Center (고물상/재활용센터)", "Waste Incinerator (쓰레기 소각장)"],
+        "23.교정및군사시설": ["Prison (교도소)", "Detention Center (구치소)", "Military Barracks (군부대 막사)", "Military Bunker (군사 벙커)"],
+        "24.방송통신시설": ["Broadcasting Station (방송국)", "Radio Station (라디오 방송국)", "Data Center (데이터센터/IDC)", "Telecom Tower Building (통신국)"],
+        "25.발전시설": ["Power Plant (화력/원자력 발전소)", "Solar Power Plant (태양광 발전소)", "Wind Farm (풍력 발전 단지)"],
+        "26.묘지관련시설": ["Crematorium (화장장)", "Ossuary (납골당/봉안당)", "Cemetery Chapel (묘지 예배당)"],
+        "27.관광휴게시설": ["Outdoor Amphitheater (야외 음악당)", "Observatory Tower (전망 타워)", "Highway Rest Area (고속도로 휴게소)"],
+        "28.장례시설": ["Funeral Home (장례식장)", "Pet Funeral Hall (동물 장례식장)"],
+        "29.야영장시설": ["Camping Site (일반 야영장)", "Auto Camping Site (자동차 야영장)", "Glamping Site (글램핑장)"]
     },
     "style": [
         "Minimalist (미니멀리즘)", "International Style (국제주의 양식)", "Bauhaus (바우하우스)", "Mid-Century Modern (미드센추리 모던)", "Industrial Chic (인더스트리얼 시크)", "Postmodernism (포스트모더니즘)", "Deconstructivist (해체주의)", "Tiny House Movement (타이니 하우스)", "Shipping Container (컨테이너 건축)", "Le Corbusier Style (르 코르뷔지에 스타일)", "Tadao Ando Style (안도 타다오 스타일)", "Frank Gehry Style (프랭크 게리 스타일)",
@@ -385,7 +210,6 @@ const DATA_SHEET = {
         "Camper Van (캠핑카)", "RV (캠핑카)", "Classic Vintage Car (클래식카)", "Golf Cart (골프 카트)", "Construction Truck (공사 트럭)", "Excavator (굴착기)", "Tractor (트랙터)", 
         "Self-driving Shuttle (자율주행)", "Flying Taxi (플라잉 택시/UAM)", "Drone (드론)", "Futuristic Pod (미래형 포드)", "Hovercraft (호버크래프트)", "Boat (보트)", "Yacht (요트)", "No Vehicles (차량 없음)"
     ],
-    // 💎 [NEW] 밀도 3종 세트 (한영 병기)
     "nature_density": [
         "No Plants (식재 없음/인공적)",
         "Sparse Potted Plants (드문드문한 화분)",
@@ -481,199 +305,217 @@ const DATA_SHEET = {
 };
 
 // ==========================================================================
-// 2. ORGANIC SCENARIOS (V58 시나리오 전체 완벽 이식)
+// 2. THEME PRESETS (서버 주도형 큐레이션 - 완벽한 조합 정의)
 // ==========================================================================
-const ORGANIC_SCENARIOS = {
-    'heritage': { 
-        s5: ['Grand Gothic Architecture', 'Neo-Classical Masterpiece', 'Korean Traditional Hanok with modern twist'], 
-        s6: ['Aged Stone Texture with moss', 'Weathered Red Brick', 'Rough Granite and Dark Wood'], 
-        s9: ['Golden Hour with dramatic long shadows', 'Sunset creating silhouette'], 
-        s17: ['Volumetric Lighting', 'God Rays piercing through clouds', 'Cinematic Warm Lighting'], 
-        s16: ['Low angle looking up to emphasize scale'], 
-        s14: ['Cinematic Movie Still', 'Historical Documentary Style'],
-        s23: ['Intricate Carvings', 'Detailed Ornamentation'],
-        boost: 'epic scale, monumental, timeless beauty, 8k resolution' 
-    },
-    'modern': { 
-        s5: ['Contemporary Minimalist Architecture', 'Bauhaus Inspired Villa', 'International Style Skyscraper'], 
-        s6: ['Smooth Exposed Concrete', 'Seamless Floor-to-Ceiling Glass', 'White Stucco and Black Steel'], 
-        s9: ['High Noon with sharp shadows', 'Overcast soft daylight'], 
-        s17: ['Natural Global Illumination', 'Soft Ambient Occlusion', 'Clean Studio Lighting'], 
-        s16: ['Eye-level architectural photography', '2-Point Perspective'], 
-        s14: ['ArchDaily Featured Project', 'Dezeen Style Photography'],
-        s22: ['24mm Tilt-Shift Lens'], 
-        boost: 'ultra-clean, sharp edges, hyper-realistic, unreal engine 5 render'
-    },
-    'organic': { 
-        s5: ['Biophilic Parametric Design', 'Eco-friendly Earth House', 'Vertical Forest Architecture'], 
-        s6: ['Natural Timber Cladding', 'Bamboo and Raw Stone', 'Living Green Wall mixed with glass'], 
-        s19: ['Dense Tropical Forest surrounding', 'Lush Botanical Garden'], 
-        s17: ['Dappled Sunlight through trees', 'Soft Diffused Light'], 
-        s11: ['Serene', 'Healing atmosphere', 'Zen-like tranquility'], 
-        s8: ['Curvilinear forms', 'Fluid organic shapes'],
-        boost: 'harmony with nature, sustainable design, photorealistic vegetation'
-    },
-    'hitech': { 
-        s5: ['Futuristic Deconstructivism', 'Parametric High-Tech Facade', 'Zaha Hadid Style Fluidity'], 
-        s6: ['Brushed Titanium Panels', 'Perforated Aluminum Skin', 'Carbon Fiber and Smart Glass'], 
-        s17: ['Cold LED accents', 'Reflection on metallic surfaces', 'Crisp Studio Lighting'], 
-        s9: ['Blue Hour (Twilight)', 'Night with internal glow'],
-        s8: ['Dynamic cantilever', 'Anti-gravity floating form'],
-        s22: ['14mm Wide Angle Lens'], 
-        boost: 'cutting-edge technology, innovative structure, detailed engineering'
-    },
-    'night': { 
-        s9: ['Deep Midnight', 'Rainy Night'], 
-        s17: ['Neon City Lights reflecting on wet road', 'Cyberpunk Color Grading (Cyan & Pink)', 'Cinematic Bokeh'], 
-        s6: ['Wet Asphalt', 'Reflective Glass', 'Dark Steel'], 
-        s11: ['Moody', 'Noir Atmosphere', 'Mystery'], 
-        s20: ['Busy street with light trails', 'Rain-slicked pavement'], 
-        boost: 'high contrast, dramatic lighting, ray tracing, night photography'
-    },
-    'forest': { 
-        s2: ['Deep Forest', 'Mountain'], 
-        s19: ['Pine Trees', 'Ferns', 'Moss'], 
-        s10: ['Foggy', 'Misty', 'Rainy'], 
-        s17: ['Diffused', 'Gloomy', 'Cinematic'], 
-        s6: ['Dark Wood', 'Rough Stone', 'Corten Steel'], 
-        s11: ['Mysterious', 'Secluded', 'Quiet'],
-        s5: ['Cabin', 'Retreat', 'Tiny House']
-    },
-    'desert': { 
-        s2: ['Desert', 'Dune', 'Canyon'], 
-        s19: ['Cactus', 'Dry Grass', 'Rocks'], 
-        s10: ['Clear', 'Heat Haze'], 
-        s6: ['Rammed Earth', 'Sandstone', 'Terracotta'], 
-        s17: ['Hard Shadow', 'High Contrast', 'Warm'], 
-        s11: ['Arid', 'Minimalist', 'Solitude'],
-        s9: ['High Noon']
-    },
-    'snow': { 
-        s21: ['Winter'], 
-        s10: ['Snowing', 'Blizzard', 'Overcast'], 
-        s19: ['Snowfield', 'Frozen Lake', 'Conifer'], 
-        s17: ['Cold', 'Blue Tint', 'Soft'], 
-        s11: ['Cozy', 'Silent', 'Serene'], 
-        s6: ['Black Concrete', 'Burnt Wood', 'Glass'], 
-        s9: ['Morning', 'Daylight']
-    },
-    'ocean': { 
-        s2: ['Cliff', 'Coastal', 'Beachfront'], 
-        s19: ['Ocean View', 'Infinity Pool', 'Palm Trees'], 
-        s10: ['Sunny', 'Blue Sky'], 
-        s17: ['Bright', 'Sunny', 'Natural'], 
-        s5: ['Modern', 'Resort', 'Mediterranean'], 
-        s6: ['White Stucco', 'Glass', 'Travertine'], 
-        s16: ['Wide angle', 'Aerial']
-    },
-    'resort': { 
-        s3: ['15.숙박시설', 'Hotel', 'Resort'], 
-        s13: ['Relaxing', 'Leisure'], 
-        s17: ['Golden Hour', 'Warm', 'Pool Lighting'], 
-        s19: ['Swimming Pool', 'Tropical Garden', 'Cabana'], 
-        s11: ['Luxury', 'Exclusive', 'Vacation vibe'], 
-        s16: ['Eye-level', 'Drone View'],
-        boost: 'award winning hotel design, 5-star luxury, travel photography'
-    },
-    'cyber': { 
-        s1: ['Neo Tokyo', 'Hong Kong Backstreet', 'Cyber Seoul'], 
-        s5: ['Cyberpunk', 'Industrial'], 
-        s10: ['Heavy Rain', 'Acid Rain'], 
-        s17: ['Neon Sign', 'Laser', 'Pink and Cyan'], 
-        s12: ['High Density'], 
-        s6: ['Metal', 'Concrete', 'Plastic'],
-        s26: ['Motion Blur']
-    },
-    'ruins': { 
-        s24: ['Post-Apocalyptic', 'Abandoned', 'Decay'], 
-        s6: ['Rusted Metal', 'Broken Concrete', 'Mossy Stone'], 
-        s10: ['Cloudy', 'Gloomy'], 
-        s19: ['Overgrown', 'Weeds', 'Ivy'], 
-        s11: ['Sad', 'Lonely', 'Dark', 'Haunting'], 
-        s5: ['Brutalism', 'Industrial'],
-        s17: ['Low Light', 'Shadowy']
-    },
-    'space': { 
-        s1: ['Mars Colony', 'Moon Base', 'Orbital Station'], 
-        s5: ['Aerospace', 'High-Tech'], 
-        s2: ['Crater', 'Alien Landscape'], 
-        s9: ['Space Black', 'Starry'], 
-        s17: ['Starlight', 'Cold LED', 'Rim Light'], 
-        s10: ['No Atmosphere'], 
-        s6: ['Gold Foil', 'White Panel', 'Solar Panel'],
-        s15: ['Unreal Engine 5']
-    },
-    'underwater': { 
-        s1: ['Underwater City', 'Deep Sea Lab'], 
-        s2: ['Sea Bed', 'Coral Reef'], 
-        s5: ['Futuristic', 'Bubble Architecture'], 
-        s6: ['Reinforced Glass', 'Transparent'], 
-        s17: ['Caustics', 'God Rays', 'Blue Light'], 
-        s11: ['Mysterious', 'Fantasy', 'Submerged'],
-        s10: ['Clear Water']
-    } 
+const THEME_PRESETS = {
+    'heritage': [
+        { 
+            s5: "Traditional Hanok (전통 한옥)", s0: "South Korea (대한민국)", s1: "Seoul Bukchon (서울 북촌)", 
+            s6: "Korean Giwa (기와)", s2: "Narrow Golmok Alley (좁은 골목길)", s19: "Madang Courtyard (마당/중정)",
+            s8: "Courtyard House (중정형 주택)", s9: "Late Afternoon (늦은 오후)", s17: "Golden Hour (골든아워)",
+            s3: "1.단독주택", s4: "Detached House (단독주택)",
+            boost: "authentic cultural heritage, national geographic photography, highly detailed texture, warm atmosphere"
+        },
+        { 
+            s5: "Gothic Revival (고딕 리바이벌)", s0: "Europe (유럽)", s1: "London Victorian District (런던)",
+            s6: "Limestone (라임스톤)", s2: "historic district (역사 지구)", s19: "Manicured Lawn (잔디밭)",
+            s8: "Spire Top (첨탑)", s9: "Overcast (잔뜩 흐림)", s17: "Soft Diffused Light (확산광)",
+            s3: "6.종교시설", s4: "Cathedral (성당)",
+            boost: "monumental scale, cinematic history, dramatic lighting, sharp focus"
+        }
+    ],
+    'modern': [
+        { 
+            s5: "Minimalist (미니멀리즘)", s0: "South Korea (대한민국)", s1: "Seoul Gangnam (서울 강남)",
+            s6: "Exposed Concrete (노출 콘크리트)", s2: "urban rooftop (도심 옥상)", s19: "Zen Rock Garden (젠 정원)",
+            s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s17: "Hard Light (강한 빛)",
+            s3: "2.공동주택", s4: "Row House (연립주택/빌라 4층이하)",
+            boost: "archdaily featured, clean lines, modern architecture, pure geometry"
+        },
+        { 
+            s5: "Mid-Century Modern (미드센추리 모던)", s0: "USA / Americas (미주)", s1: "Los Angeles Beverly Hills (LA 비벌리힐스)",
+            s6: "White Stucco (화이트 스타코)", s2: "cliffside (절벽 끝)", s19: "Infinity Pool (인피니티 풀)",
+            s8: "Cantilevered (캔틸레버)", s9: "Sunset (일몰)", s17: "Warm Interior Glow (내부 조명)",
+            s3: "1.단독주택", s4: "Detached House (단독주택)",
+            boost: "luxury lifestyle, david hockney style, iconic design, clear sky"
+        }
+    ],
+    'organic': [
+        { 
+            s5: "Biophilic (바이오필릭)", s0: "Asia / Middle East (아시아/중동)", s1: "Singapore Gardens by the Bay (싱가포르 가든스 바이 더 베이)",
+            s6: "Green Wall (수직 정원)", s2: "high-density block (고밀도 블록)", s19: "Vertical Gardens everywhere (수직 정원 도배)",
+            s8: "Fluid Organic (유기적 곡선)", s9: "Morning Haze (아침 안개)", s17: "Natural Sunlight (자연광)",
+            s3: "14.업무시설", s4: "Office Skyscraper (고층 오피스 빌딩)",
+            boost: "sustainable architecture, eco-friendly, lush vegetation, harmony with nature"
+        }
+    ],
+    'hitech': [
+        { 
+            s5: "Neo-Futurism (네오 퓨처리즘)", s0: "South Korea (대한민국)", s1: "Seoul Dongdaemun DDP Area (서울 동대문)",
+            s6: "Titanium Panel (티타늄 패널)", s2: "Pedestrian Plaza (광장)", s19: "No Plants (식재 없음/인공적)",
+            s8: "Fluid Organic (유기적 곡선)", s9: "Blue Hour (블루아워)", s17: "LED Strip Lights (LED 라인 조명)",
+            s3: "5.문화및집회시설", s4: "Art Gallery (미술관)",
+            boost: "zaha hadid style, parametric design, futuristic curves, metallic texture"
+        }
+    ],
+    'ocean': [
+        { 
+            s5: "Resort Condominium (콘도/리조트)", s0: "Nature / Wild (대자연/오지)", s1: "Maldives Overwater (몰디브 수상)",
+            s6: "Thatch Roof (초가지붕)", s2: "floating on water (수상)", s19: "Ocean (바다)",
+            s8: "Stilt House (고상 가옥)", s9: "Midday Sun (한낮)", s17: "Direct Sunlight (직사광)",
+            s3: "15.숙박시설", s4: "Resort Condominium (콘도/리조트)",
+            boost: "crystal clear water, luxury travel, relaxing vibe, vacation photography"
+        },
+        { 
+            s5: "Modern (모던)", s0: "South Korea (대한민국)", s1: "Jeju Volcanic Coast (제주 해안)",
+            s6: "Basalt (현무암)", s2: "rocky coastline (바위 해안)", s19: "Ocean (바다)",
+            s8: "Low-rise (저층)", s9: "Windy (바람부는)", s17: "Dramatic Sky (드라마틱한 하늘)",
+            s3: "3.제1종근린생활시설", s4: "Cafe/Tea House (휴게음식점)",
+            boost: "melancholic atmosphere, emotional scenery, jeju island vibe, cinematic"
+        }
+    ],
+    'night': [
+        { 
+            s5: "Cyberpunk (사이버펑크)", s0: "Asia / Middle East (아시아/중동)", s1: "Cyberpunk Neo-Tokyo (도쿄)",
+            s6: "Curtain Wall Glass (커튼월)", s2: "Intersection (교차로)", s19: "No Plants (식재 없음/인공적)",
+            s8: "Skyscraper (마천루)", s9: "Deep Night (심야)", s17: "Neon Lights (네온)",
+            s3: "16.위락시설", s4: "Nightclub (나이트클럽/유흥주점)",
+            boost: "blade runner vibe, rain reflections, wet asphalt, cinematic bokeh"
+        }
+    ],
+    'forest': [
+        { 
+            s5: "Rustic Cabin (러스틱 캐빈)", s0: "Nature / Wild (대자연/오지)", s1: "Rocky Mountains (록키 산맥)",
+            s6: "Weathered Barn Wood (고재)", s2: "forest clearing (숲속 공터)", s19: "Pine Trees (소나무)",
+            s8: "Single-story (단층)", s9: "Morning Mist (아침 안개)", s17: "Diffused Light (확산광)",
+            s3: "1.단독주택", s4: "Detached House (단독주택)",
+            boost: "mysterious atmosphere, secluded, nature photography, earthy tones"
+        }
+    ],
+    'desert': [
+        { 
+            s5: "Modern (모던)", s0: "Nature / Wild (대자연/오지)", s1: "Sahara Desert Oasis (사하라 사막 오아시스)",
+            s6: "Rammed Earth (다짐 흙)", s2: "desert dunes (사막 언덕)", s19: "Cactus Garden (선인장)",
+            s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s17: "Hard Light (강한 빛)",
+            s3: "15.숙박시설", s4: "Luxury Hotel (관광호텔)",
+            boost: "dune movie style, warm aesthetic, minimal, vast landscape"
+        }
+    ],
+    'snow': [
+        { 
+            s5: "Scandivavian (북유럽식)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)",
+            s6: "CLT Timber (구조용 목재)", s2: "mountain peak (산 정상)", s19: "Forest (숲)",
+            s8: "A-Frame", s9: "Snowy (눈 내리는)", s17: "Warm Interior Glow (내부 조명)",
+            s3: "15.숙박시설", s4: "Resort Condominium (콘도/리조트)",
+            boost: "winter wonderland, cozy atmosphere, snow particles, cold blue tones"
+        }
+    ],
+    'resort': [
+        { 
+            s5: "Mediterranean (지중해식)", s0: "Asia / Middle East (아시아/중동)", s1: "Bali Ubud Jungle (발리 우붓 정글)",
+            s6: "Bamboo (대나무)", s2: "cliffside (절벽 끝)", s19: "Infinity Pool (인피니티 풀)",
+            s8: "Terraced (테라스형)", s9: "Sunset (일몰)", s17: "Golden Hour (골든아워)",
+            s3: "15.숙박시설", s4: "Private Villa (풀빌라)",
+            boost: "award winning hotel design, 5-star luxury, tropical vacation, relaxing"
+        }
+    ],
+    'cyber': [
+        { 
+            s5: "High-Tech (하이테크)", s0: "Asia / Middle East (아시아/중동)", s1: "Hong Kong Neon Street (홍콩)",
+            s6: "Media Facade (미디어 파사드)", s2: "high-density block (고밀도 블록)", s19: "No Plants (식재 없음/인공적)",
+            s8: "Mega-tall Structure (메가톨)", s9: "Rainy (비오는)", s17: "Neon Lights (네온)",
+            s3: "14.업무시설", s4: "Office Skyscraper (고층 오피스 빌딩)",
+            boost: "cyberpunk 2077 style, dystopian future, holographic signs, busy street"
+        }
+    ],
+    'ruins': [
+        { 
+            s5: "Brutalist (브루탈리즘)", s0: "Europe (유럽)", s1: "Chernobyl Exclusion Zone",
+            s6: "Exposed Concrete (노출 콘크리트)", s2: "within urban ruins (유적지)", s19: "Overgrown Jungle (뒤덮인 정글/폐허)",
+            s8: "Monolithic Block (일체형 블록)", s9: "Overcast (잔뜩 흐림)", s17: "Gloomy (우울한 날씨)",
+            s3: "17.공장", s4: "General Factory (일반 공장)",
+            boost: "the last of us style, post-apocalyptic, abandoned, decay, nature taking over"
+        }
+    ],
+    'space': [
+        { 
+            s5: "Space Age (스페이스 에이지)", s0: "Sci-Fi / Space (우주/미래)", s1: "Mars Colony (화성 식민지)",
+            s6: "Titanium Panel (티타늄 패널)", s2: "mars canyon (화성 협곡)", s19: "No Plants (식재 없음/인공적)",
+            s8: "Geodesic Dome (지오데식 돔)", s9: "Starry Night (별밤)", s17: "Cinematic Lighting (영화 조명)",
+            s3: "10.교육연구시설", s4: "Research Center (연구소)",
+            boost: "interstellar movie style, realistic sci-fi, 8k render, nasa punk"
+        }
+    ],
+    'underwater': [
+        { 
+            s5: "Futurism (퓨처리즘)", s0: "Nature / Wild (대자연/오지)", s1: "Underwater City (수중 도시)",
+            s6: "Thick Glass (두꺼운 유리)", s2: "underwater reef (수중 산호초)", s19: "Coral Reef",
+            s8: "Bubble Architecture", s9: "Deep Night (심야)", s17: "Bioluminescence (생체 발광)",
+            s3: "10.교육연구시설", s4: "Research Center (연구소)",
+            boost: "avatar way of water style, marine life, caustic lighting, deep blue"
+        }
+    ],
+    'scifi': [
+        {
+            s5: "Parametric (파라메트릭)", s0: "Sci-Fi / Space (우주/미래)", s1: "Cloud City (공중 도시)",
+            s6: "White Stucco (화이트 스타코)", s2: "floating platform (부유식 플랫폼)", s19: "Vertical Garden (수직 정원)",
+            s8: "Fluid Organic (유기적 곡선)", s9: "Clear Sky (맑음)", s17: "Bright Sunlight",
+            s3: "1.단독주택", s4: "Detached House (단독주택)",
+            boost: "utopian future, clean composition, solarpunk, aerial view"
+        }
+    ]
 };
 
-// API 1: 데이터 제공 (프론트엔드가 처음 켜질 때 가져감)
+// API 1: 데이터 제공
 app.get('/api/data', (req, res) => {
-    res.json({
-        dataSheet: DATA_SHEET,
-        scenarios: ORGANIC_SCENARIOS
-    });
+    res.json({ dataSheet: DATA_SHEET });
 });
 
-// API 2: 나노 바나나 프롬프트 생성 (핵심 로직 - 밀도 3종 추가됨)
-app.post('/api/generate', (req, res) => {
-    const { choices, themeBoost } = req.body; 
-
-    // 값 정제 함수
-    const getV = (key) => {
-        if (!choices[key]) return "";
-        let val = choices[key];
-        return val.replace(/\(.*\)/, "").trim();
-    };
-
-    // 🍌 [Nano Banana 엔진 로직 - 누락 항목 완벽 반영됨]
-    // s24(Concept)와 s7(Scale/Floor) 추가됨
-    const subjectParts = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean);
-    const subject = subjectParts.join(" ");
-
-    const matParts = [getV('s6'), getV('s23')].filter(Boolean);
-    const mat = matParts.join(" and ");
-
-    // 환경 요소
-    const envParts = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean);
-    const env = envParts.join(", specifically ");
-
-    const atmoParts = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean);
-    const atmosphere = atmoParts.join(", ");
-
-    // [업데이트] 밀도 요소: s25(Vehicle Type)와 s13(Action) 추가됨
-    const densityParts = [getV('s25'), getV('s29'), getV('s28'), getV('s13')].filter(Boolean);
-    const density = densityParts.join(", ");
-
-    const techParts = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean);
-    const tech = techParts.join(", ");
-
-    let finalPrompt = `Create a highly detailed, photorealistic architectural image of a ${subject}. `;
-
-    if (mat) finalPrompt += `The structure is constructed primarily of ${mat}. `;
-    if (env) finalPrompt += `It is situated in ${env}. `;
-    if (density) finalPrompt += `The scene features ${density}. `; 
-    if (atmosphere) finalPrompt += `The scene captures the atmosphere of ${atmosphere}. `;
-    if (tech) finalPrompt += `The image should have the quality of ${tech}. `;
-
-    if (themeBoost) finalPrompt += `Ensure the image reflects ${themeBoost}. `;
-
-    finalPrompt += `Render in 8k resolution, sharp focus, cinematic lighting, and architectural photography style.`;
-
-    const ratioVal = getV('s18');
-    if (ratioVal) {
-        const ratioText = ratioVal.replace("--ar ", "").replace(" (Standard)", "");
-        finalPrompt += ` (Aspect Ratio: ${ratioText})`;
+// API 2: 프리셋 제공 (큐레이션 로직)
+app.get('/api/preset/:themeKey', (req, res) => {
+    const key = req.params.themeKey;
+    const presets = THEME_PRESETS[key];
+    
+    if (presets && presets.length > 0) {
+        // 랜덤으로 하나의 완벽한 세트를 골라서 보냄
+        const choice = presets[Math.floor(Math.random() * presets.length)];
+        res.json(choice);
+    } else {
+        res.json({ error: "No preset found, using default" });
     }
+});
 
-    res.json({ result: finalPrompt });
+// API 3: 프롬프트 생성 (심플 & 강력)
+app.post('/api/generate', (req, res) => {
+    const { choices, themeBoost } = req.body;
+    const getV = (k) => choices[k] ? choices[k].replace(/\(.*\)/, "").trim() : "";
+
+    // 1. 기본 문장 구성
+    const subject = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean).join(" ");
+    const mat = [getV('s6'), getV('s23')].filter(Boolean).join(" and ");
+    const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean).join(", specifically ");
+    const atmo = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean).join(", ");
+    const density = [getV('s25'), getV('s29'), getV('s28'), getV('s13')].filter(Boolean).join(", ");
+    const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean).join(", ");
+    
+    let prompt = `A professional architectural photograph of Create a highly detailed, photorealistic architectural image of a ${subject}. `;
+    if(mat) prompt += `The structure is constructed primarily of ${mat}. `;
+    if(env) prompt += `It is situated in ${env}. `;
+    if(density) prompt += `The scene features ${density}. `;
+    if(atmo) prompt += `The scene captures the atmosphere of ${atmo}. `;
+    if(tech) prompt += `The image should have the quality of ${tech}. `;
+    
+    // 2. 전문가의 Boost 키워드 (테마에서 넘어온 것)
+    if(themeBoost) prompt += `Ensure the image reflects ${themeBoost}. `;
+    
+    prompt += `Render in 8k resolution, sharp focus, cinematic lighting, and architectural photography style.`;
+    
+    const ratio = getV('s18').replace("--ar ", "").replace(" (Standard)", "");
+    if(ratio) prompt += ` (Aspect Ratio: ${ratio})`;
+
+    prompt += `, Archdaily masterpiece, Architectural photography, Phase One IQ4, 150MP, sharp focus, magazine quality, clean composition, natural lighting --no text watermark logo signature blurry low-res words typography`;
+
+    res.json({ result: prompt });
 });
 
 app.listen(port, () => {
