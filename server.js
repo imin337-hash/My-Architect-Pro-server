@@ -7,12 +7,10 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================================================
-// 1. DATA_SHEET (UI 렌더링을 위한 전체 데이터 풀)
+// 1. DATA_SHEET (전체 데이터 풀 - 누락 없음)
 // ==========================================================================
 const DATA_SHEET = {
-    "config": {
-        "masters": [] 
-    },
+    "config": { "masters": [] },
     "country": [
         "South Korea (대한민국)", "USA / Americas (미주)", "Europe (유럽)", 
         "Asia / Middle East (아시아/중동)", "Nature / Wild (대자연/오지)", "Sci-Fi / Space (우주/미래)"
@@ -242,74 +240,34 @@ const DATA_SHEET = {
         "talking (대화하는)", "laughing (웃는)", "arguing (말다툼하는)", "hugging (포옹하는)", "kissing (키스하는)", "holding hands (손잡고 있는)", "waving (손 흔드는)", "cheering (환호하는)", 
         "taking photos (사진 찍는)", "taking selfie (셀카 찍는)", "eating (먹는)", "drinking (마시는)", "shopping (쇼핑하는)", "working (일하는)", "selling (파는)", "playing music (연주하는)", "dancing (춤추는)", "painting (그림 그리는)", "walking dog (개 산책시키는)"
     ],
-    "rep": [
-        "Hyper-realistic Photo (극사실 사진)", "3D Render (3D 렌더)", "White Model (화이트 모델)", "Clay Render (클레이 렌더)", "Architectural Photography (건축 사진)", 
-        "Watercolor (수채화)", "Oil Painting (유화)", "Acrylic Painting (아크릴화)", "Pencil Sketch (연필 스케치)", "Charcoal Sketch (숯 드로잉)", "Pen and Ink (펜화)", "Marker Sketch (마카 스케치)", "Colored Pencil (색연필화)", "Ink Wash Painting (수묵화)", "Impressionism (인상파)", 
-        "Digital Painting (디지털 페인팅)", "Concept Art (컨셉 아트)", "Matte Painting (매트 페인팅)", "Vector Art (벡터 아트)", "Pixel Art (픽셀 아트)", "Voxel Art (복셀 아트)", "Low Poly Art (로우 폴리)", "Anime Style (애니메이션 스타일)", "Studio Ghibli Style (지브리 스타일)", "Cyberpunk Style (사이버펑크 스타일)", 
-        "Blueprint (청사진)", "Technical Drawing (기술 도면)", "Section Cut (단면도)", "Exploded Axonometric (분해 액소노메트릭)", "Elevation View (입면도)", "Plan View (평면도)", "Wireframe (와이어프레임)", "Point Cloud (점군 데이터)", "Thermal Imaging (열화상)", "X-Ray View (엑스레이)"
-    ],
-    "motion": [
-        "Still Life (정적인)", "Frozen in Time (시간 정지)", "Long Exposure (장노출)", 
-        "Time-lapse (타임랩스)", "Hyper-lapse (하이퍼랩스)",
-        "Panning Shot (패닝 샷)", "Smooth Pan (부드러운 팬)", "Whip Pan (휩 팬)", 
-        "Zoom Burst (줌 버스트)", "Dolly Zoom (돌리 줌)", "Vertigo Effect (버티고 효과)", "Rack Focus (초점 이동)", 
-        "Tilt Down (틸트 다운)", "Tilt Up (틸트 업)", "Tracking Shot (트래킹 샷)", "Crab Shot (크랩 샷)", "Arc Shot (아크 샷)", 
-        "Crane Shot (크레인 샷)", "Drone Flyover (드론 비행)", "Handheld Look (핸드헬드)", "Camera Shake (카메라 흔들림)", "Stabilized (안정된)", "Cinematic Flow (영화적 흐름)",
-        "Dynamic Movement (역동적)", "Slow Motion (슬로우 모션)", "High Speed Photography (고속 촬영)", 
-        "Walking Motion (걷는 동작)", "Running Motion (달리는 동작)", "Jumping (점프하는)", "Flying (나는)", "Falling (떨어지는)", 
-        "Dancing Motion (춤추는 동작)", "Fighting Motion (싸우는 동작)", "Driving Motion (운전하는 동작)", 
-        "Traffic Flow (교통 흐름)", "Crowd Movement (군중의 이동)", "Spinning (회전하는)",
-        "Motion Blur (모션 블러)", "Light Trails (빛의 궤적)", "Star Trails (별의 궤적)", 
-        "Water Flow (흐르는 물)", "Rippling (물결)", "Splashing (튀기는 물)", 
-        "Cloud Movement (구름의 이동)", "Wind Blown (바람에 날리는)", "Leaves Blowing (날리는 나뭇잎)", 
-        "Fabric Flowing (휘날리는 천)", "Hair Blowing (날리는 머리카락)", "Floating Dust (떠다니는 먼지)", 
-        "Falling Rain (내리는 비)", "Falling Snow (내리는 눈)", 
-        "Explosion (폭발)", "Shattering (산산조각)", "Vibrating (진동하는)"
-    ],
-    "engine": [
-        "Unreal Engine 5.4", "Unreal Engine 5.5", "Unity 6", "Unity HDRP", "CryEngine", "NVIDIA Omniverse", 
-        "Octane Render 8K", "V-Ray 6", "Corona Render", "Redshift", "Arnold Render", "Maxwell Render", "Keyshot", "Cycles (Blender)", 
-        "Lumion 2024", "Twinmotion", "Enscape", "D5 Render", 
-        "Midjourney V6.1", "Stable Diffusion XL", "Stable Diffusion 3", "DALL-E 3", "Adobe Firefly", "Magnific AI", 
-        "Blender Eevee", "WebGL", "Three.js"
-    ],
-    "view": [
-        "Eye-level (눈높이)", "Human Eye View (사람 시점)", "Street Level (거리 높이)", 
-        "Low Angle (로우 앵글)", "Worm's-eye (앙시도)", "High Angle (하이 앵글)", "Bird's-eye (조감도)", "Aerial View (항공 뷰)", "Drone Shot (드론 샷)", "Satellite View (위성 뷰)", "Top-Down (수직 부감)", 
-        "Isometric (아이소)", "Perspective (투시도)", "One-point Perspective (1소점)", "Two-point Perspective (2소점)", "Elevation (입면)", "Sectional View (단면 뷰)", 
-        "Wide-angle (광각)", "Fish-eye (어안 렌즈)", "Panoramic (파노라마)", "360 Degree (360도)", "Close-up (클로즈업)", "Macro Shot (접사)", "Over-the-Shoulder (오버 더 숄더)", "POV (1인칭 시점)", 
-        "Dutch Angle (더치 앵글/기울기)", "Silhouette View (실루엣 뷰)", "Reflection View (반사 뷰)", "Framed View (프레임 뷰)", "Through the Window (창문 너머)"
-    ],
-    "lens": [
-        "35mm Lens (표준 광각)", "50mm Lens (표준)", "85mm Lens (인물용)", 
-        "14mm Lens (초광각)", "16mm Lens (초광각)", "24mm Lens (광각)", "Wide-angle Zoom (광각 줌)", 
-        "70mm Lens (준망원)", "100mm Lens (망원)", "135mm Lens (망원)", "200mm Lens (장망원)", "Telephoto Zoom (망원 줌)", 
-        "Macro Lens (매크로)", "Fish-eye Lens (어안)", "Tilt-shift Lens (틸트시프트)", "Anamorphic Lens (아나모픽)", "Cine Lens (시네마)", 
-        "f/1.8 (얕은 심도)", "f/2.8 (적당한 심도)", "f/8.0 (깊은 심도)", "Shallow Depth of Field (아웃포커싱)", "Deep of Field (팬포커스)", "Bokeh Effect (보케)", 
-        "Lens Flare (렌즈 플레어)", "Chromatic Aberration (색수차)", "Vignetting (비네팅)", "ISO 100 (저감도/깨끗함)", "ISO 3200 (그레인)"
-    ],
-    "light": [
-        "Natural Sunlight (자연광)", "Direct Sunlight (직사광)", "Diffused Light (확산광)", "Moonlight (달빛)", "Starlight (별빛)", 
-        "Golden Hour (골든아워)", "Blue Hour (블루아워)", "Warm Interior Glow (내부 조명)", "God Rays (빛내림)", "Volumetric Rays (틴달 현상)", "Atmospheric Perspective (대기 원근법)", 
-        "Neon Lights (네온)", "Streetlight (가로등)", "LED Light (LED)", "Fluorescent Light (형광등)", "Floodlight (투광 조명)", "Spotlight (스포트라이트)", 
-        "Soft Light (부드러운 빛)", "Hard Light (강한 빛)", "Rim Light (림 라이트/후광)", "Backlight (역광)", "Sidelight (측광)", "Softbox (소프트박스)", "Rembrandt Lighting (렘브란트 조명)", "Cinematic Lighting (영화 조명)", "Dramatic Chiaroscuro (명암대비)", 
-        "Bioluminescence (생체 발광)", "Firelight (불빛)", "Candlelight (촛불)", "Laser Light (레이저)", "Glow in the Dark (야광)"
-    ],
-    "ratio": [
-        "--ar 16:9 (Standard)", "--ar 3:2 (Photo)", "--ar 4:3 (Traditional)", "--ar 2:1 (Wide)", "--ar 2.35:1 (Cinema)", "--ar 32:9 (Super Wide)",
-        "--ar 9:16 (Story)", "--ar 2:3 (Portrait)", "--ar 3:4 (Social)", "--ar 4:5 (Insta)", "--ar 1:2 (Tall)", 
-        "--ar 1:1 (Square)", 
-        "--ar 16:10", "--ar 1.85:1", "--ar 1.43:1 (IMAX)"
-    ],
-    "sub": [] 
+    // 💎 [FIXED] 사용자가 요청한 기본값으로 데이터 시트 재정렬 (맨 앞이 기본값이 되도록 유도 가능하지만, 프리셋으로 강제함)
+    "rep": ["Hyper-realistic Photo (극사실 사진)", "Unreal Engine 5", "Architectural Photography", "Cinematic Still"],
+    "engine": ["Unreal Engine 5.5", "V-Ray 6", "Midjourney V6.1", "Octane Render"],
+    "view": ["Eye-level (눈높이)", "Low Angle", "Aerial View", "Drone Shot", "Isometric"],
+    "lens": ["35mm Lens (표준 광각)", "24mm Wide", "50mm Prime", "85mm Portrait", "Tilt-Shift"],
+    "motion": ["Still Life (정적인)", "Long Exposure", "Motion Blur", "Time-lapse"],
+    "light": ["Natural Sunlight", "Soft Diffused", "Neon Lights", "Cinematic Lighting", "Volumetric Fog", "God Rays"],
+    "ratio": ["--ar 1:1 (Square)", "--ar 16:9", "--ar 4:3", "--ar 9:16"]
 };
 
 // ==========================================================================
-// 2. THEME PRESETS (서버 주도형 큐레이션 - 완벽한 조합 정의)
+// 2. THEME PRESETS (사용자 요청 Tech Specs 기본값 적용)
 // ==========================================================================
+
+// 💎 모든 프리셋에 공통으로 적용될 Tech Specs (요청하신 사진 기준)
+const COMMON_TECH_SPECS = {
+    s14: "Hyper-realistic Photo (극사실 사진)",
+    s15: "Unreal Engine 5.5",
+    s16: "Eye-level (눈높이)",
+    s22: "35mm Lens (표준 광각)",
+    s26: "Still Life (정적인)",
+    s18: "--ar 1:1 (Square)"
+};
+
 const THEME_PRESETS = {
     'heritage': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Traditional Hanok (전통 한옥)", s0: "South Korea (대한민국)", s1: "Seoul Bukchon (서울 북촌)", 
             s6: "Korean Giwa (기와)", s2: "Narrow Golmok Alley (좁은 골목길)", s19: "Madang Courtyard (마당/중정)",
             s8: "Courtyard House (중정형 주택)", s9: "Late Afternoon (늦은 오후)", s17: "Golden Hour (골든아워)",
@@ -317,6 +275,7 @@ const THEME_PRESETS = {
             boost: "authentic cultural heritage, national geographic photography, highly detailed texture, warm atmosphere"
         },
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Gothic Revival (고딕 리바이벌)", s0: "Europe (유럽)", s1: "London Victorian District (런던)",
             s6: "Limestone (라임스톤)", s2: "historic district (역사 지구)", s19: "Manicured Lawn (잔디밭)",
             s8: "Spire Top (첨탑)", s9: "Overcast (잔뜩 흐림)", s17: "Soft Diffused Light (확산광)",
@@ -326,13 +285,15 @@ const THEME_PRESETS = {
     ],
     'modern': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Minimalist (미니멀리즘)", s0: "South Korea (대한민국)", s1: "Seoul Gangnam (서울 강남)",
             s6: "Exposed Concrete (노출 콘크리트)", s2: "urban rooftop (도심 옥상)", s19: "Zen Rock Garden (젠 정원)",
             s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s17: "Hard Light (강한 빛)",
-            s3: "2.공동주택", s4: "Row House (연립주택/빌라 4층이하)",
+            s3: "2.공동주택", s4: "Row House (연립주택/빌라)",
             boost: "archdaily featured, clean lines, modern architecture, pure geometry"
         },
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Mid-Century Modern (미드센추리 모던)", s0: "USA / Americas (미주)", s1: "Los Angeles Beverly Hills (LA 비벌리힐스)",
             s6: "White Stucco (화이트 스타코)", s2: "cliffside (절벽 끝)", s19: "Infinity Pool (인피니티 풀)",
             s8: "Cantilevered (캔틸레버)", s9: "Sunset (일몰)", s17: "Warm Interior Glow (내부 조명)",
@@ -342,15 +303,17 @@ const THEME_PRESETS = {
     ],
     'organic': [
         { 
-            s5: "Biophilic (바이오필릭)", s0: "Asia / Middle East (아시아/중동)", s1: "Singapore Gardens by the Bay (싱가포르 가든스 바이 더 베이)",
+            ...COMMON_TECH_SPECS,
+            s5: "Biophilic (바이오필릭)", s0: "Asia / Middle East (아시아/중동)", s1: "Singapore Gardens by the Bay (싱가포르)",
             s6: "Green Wall (수직 정원)", s2: "high-density block (고밀도 블록)", s19: "Vertical Gardens everywhere (수직 정원 도배)",
             s8: "Fluid Organic (유기적 곡선)", s9: "Morning Haze (아침 안개)", s17: "Natural Sunlight (자연광)",
-            s3: "14.업무시설", s4: "Office Skyscraper (고층 오피스 빌딩)",
+            s3: "14.업무시설", s4: "Office Skyscraper (오피스 빌딩)",
             boost: "sustainable architecture, eco-friendly, lush vegetation, harmony with nature"
         }
     ],
     'hitech': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Neo-Futurism (네오 퓨처리즘)", s0: "South Korea (대한민국)", s1: "Seoul Dongdaemun DDP Area (서울 동대문)",
             s6: "Titanium Panel (티타늄 패널)", s2: "Pedestrian Plaza (광장)", s19: "No Plants (식재 없음/인공적)",
             s8: "Fluid Organic (유기적 곡선)", s9: "Blue Hour (블루아워)", s17: "LED Strip Lights (LED 라인 조명)",
@@ -360,13 +323,15 @@ const THEME_PRESETS = {
     ],
     'ocean': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Resort Condominium (콘도/리조트)", s0: "Nature / Wild (대자연/오지)", s1: "Maldives Overwater (몰디브 수상)",
             s6: "Thatch Roof (초가지붕)", s2: "floating on water (수상)", s19: "Ocean (바다)",
             s8: "Stilt House (고상 가옥)", s9: "Midday Sun (한낮)", s17: "Direct Sunlight (직사광)",
-            s3: "15.숙박시설", s4: "Resort Condominium (콘도/리조트)",
+            s3: "15.숙박시설", s4: "Resort Condominium (리조트)",
             boost: "crystal clear water, luxury travel, relaxing vibe, vacation photography"
         },
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Modern (모던)", s0: "South Korea (대한민국)", s1: "Jeju Volcanic Coast (제주 해안)",
             s6: "Basalt (현무암)", s2: "rocky coastline (바위 해안)", s19: "Ocean (바다)",
             s8: "Low-rise (저층)", s9: "Windy (바람부는)", s17: "Dramatic Sky (드라마틱한 하늘)",
@@ -376,24 +341,35 @@ const THEME_PRESETS = {
     ],
     'night': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Cyberpunk (사이버펑크)", s0: "Asia / Middle East (아시아/중동)", s1: "Cyberpunk Neo-Tokyo (도쿄)",
             s6: "Curtain Wall Glass (커튼월)", s2: "Intersection (교차로)", s19: "No Plants (식재 없음/인공적)",
             s8: "Skyscraper (마천루)", s9: "Deep Night (심야)", s17: "Neon Lights (네온)",
-            s3: "16.위락시설", s4: "Nightclub (나이트클럽/유흥주점)",
+            s3: "16.위락시설", s4: "Nightclub (나이트클럽)",
             boost: "blade runner vibe, rain reflections, wet asphalt, cinematic bokeh"
         }
     ],
     'forest': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Rustic Cabin (러스틱 캐빈)", s0: "Nature / Wild (대자연/오지)", s1: "Rocky Mountains (록키 산맥)",
             s6: "Weathered Barn Wood (고재)", s2: "forest clearing (숲속 공터)", s19: "Pine Trees (소나무)",
             s8: "Single-story (단층)", s9: "Morning Mist (아침 안개)", s17: "Diffused Light (확산광)",
             s3: "1.단독주택", s4: "Detached House (단독주택)",
             boost: "mysterious atmosphere, secluded, nature photography, earthy tones"
+        },
+        { // 💎 [NEW] Forest + Modern
+            ...COMMON_TECH_SPECS,
+            s5: "Modern (모던)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)",
+            s6: "Glass and Steel", s2: "mountain peak (산 정상)", s19: "Forest (숲)",
+            s8: "Cantilevered (캔틸레버)", s9: "Sunrise (일출)", s17: "Golden Hour (골든아워)",
+            s3: "15.숙박시설", s4: "Resort Condominium (리조트)",
+            boost: "fallingwater style, forest retreat, nature connection"
         }
     ],
     'desert': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Modern (모던)", s0: "Nature / Wild (대자연/오지)", s1: "Sahara Desert Oasis (사하라 사막 오아시스)",
             s6: "Rammed Earth (다짐 흙)", s2: "desert dunes (사막 언덕)", s19: "Cactus Garden (선인장)",
             s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s17: "Hard Light (강한 빛)",
@@ -403,24 +379,27 @@ const THEME_PRESETS = {
     ],
     'snow': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Scandivavian (북유럽식)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)",
             s6: "CLT Timber (구조용 목재)", s2: "mountain peak (산 정상)", s19: "Forest (숲)",
             s8: "A-Frame", s9: "Snowy (눈 내리는)", s17: "Warm Interior Glow (내부 조명)",
-            s3: "15.숙박시설", s4: "Resort Condominium (콘도/리조트)",
+            s3: "15.숙박시설", s4: "Resort Condominium (리조트)",
             boost: "winter wonderland, cozy atmosphere, snow particles, cold blue tones"
         }
     ],
     'resort': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Mediterranean (지중해식)", s0: "Asia / Middle East (아시아/중동)", s1: "Bali Ubud Jungle (발리 우붓 정글)",
             s6: "Bamboo (대나무)", s2: "cliffside (절벽 끝)", s19: "Infinity Pool (인피니티 풀)",
             s8: "Terraced (테라스형)", s9: "Sunset (일몰)", s17: "Golden Hour (골든아워)",
-            s3: "15.숙박시설", s4: "Private Villa (풀빌라)",
+            s3: "15.숙박시설", s4: "Boutique Hotel (부띠끄 호텔)",
             boost: "award winning hotel design, 5-star luxury, tropical vacation, relaxing"
         }
     ],
     'cyber': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "High-Tech (하이테크)", s0: "Asia / Middle East (아시아/중동)", s1: "Hong Kong Neon Street (홍콩)",
             s6: "Media Facade (미디어 파사드)", s2: "high-density block (고밀도 블록)", s19: "No Plants (식재 없음/인공적)",
             s8: "Mega-tall Structure (메가톨)", s9: "Rainy (비오는)", s17: "Neon Lights (네온)",
@@ -430,6 +409,7 @@ const THEME_PRESETS = {
     ],
     'ruins': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Brutalist (브루탈리즘)", s0: "Europe (유럽)", s1: "Chernobyl Exclusion Zone",
             s6: "Exposed Concrete (노출 콘크리트)", s2: "within urban ruins (유적지)", s19: "Overgrown Jungle (뒤덮인 정글/폐허)",
             s8: "Monolithic Block (일체형 블록)", s9: "Overcast (잔뜩 흐림)", s17: "Gloomy (우울한 날씨)",
@@ -439,6 +419,7 @@ const THEME_PRESETS = {
     ],
     'space': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Space Age (스페이스 에이지)", s0: "Sci-Fi / Space (우주/미래)", s1: "Mars Colony (화성 식민지)",
             s6: "Titanium Panel (티타늄 패널)", s2: "mars canyon (화성 협곡)", s19: "No Plants (식재 없음/인공적)",
             s8: "Geodesic Dome (지오데식 돔)", s9: "Starry Night (별밤)", s17: "Cinematic Lighting (영화 조명)",
@@ -448,6 +429,7 @@ const THEME_PRESETS = {
     ],
     'underwater': [
         { 
+            ...COMMON_TECH_SPECS,
             s5: "Futurism (퓨처리즘)", s0: "Nature / Wild (대자연/오지)", s1: "Underwater City (수중 도시)",
             s6: "Thick Glass (두꺼운 유리)", s2: "underwater reef (수중 산호초)", s19: "Coral Reef",
             s8: "Bubble Architecture", s9: "Deep Night (심야)", s17: "Bioluminescence (생체 발광)",
@@ -457,6 +439,7 @@ const THEME_PRESETS = {
     ],
     'scifi': [
         {
+            ...COMMON_TECH_SPECS,
             s5: "Parametric (파라메트릭)", s0: "Sci-Fi / Space (우주/미래)", s1: "Cloud City (공중 도시)",
             s6: "White Stucco (화이트 스타코)", s2: "floating platform (부유식 플랫폼)", s19: "Vertical Garden (수직 정원)",
             s8: "Fluid Organic (유기적 곡선)", s9: "Clear Sky (맑음)", s17: "Bright Sunlight",
@@ -466,31 +449,26 @@ const THEME_PRESETS = {
     ]
 };
 
-// API 1: 데이터 제공
+// API Endpoints
 app.get('/api/data', (req, res) => {
     res.json({ dataSheet: DATA_SHEET });
 });
 
-// API 2: 프리셋 제공 (큐레이션 로직)
 app.get('/api/preset/:themeKey', (req, res) => {
     const key = req.params.themeKey;
     const presets = THEME_PRESETS[key];
-    
     if (presets && presets.length > 0) {
-        // 랜덤으로 하나의 완벽한 세트를 골라서 보냄
         const choice = presets[Math.floor(Math.random() * presets.length)];
         res.json(choice);
     } else {
-        res.json({ error: "No preset found, using default" });
+        res.json({ error: "No preset found" });
     }
 });
 
-// API 3: 프롬프트 생성 (심플 & 강력)
 app.post('/api/generate', (req, res) => {
     const { choices, themeBoost } = req.body;
     const getV = (k) => choices[k] ? choices[k].replace(/\(.*\)/, "").trim() : "";
 
-    // 1. 기본 문장 구성
     const subject = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean).join(" ");
     const mat = [getV('s6'), getV('s23')].filter(Boolean).join(" and ");
     const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean).join(", specifically ");
@@ -504,8 +482,6 @@ app.post('/api/generate', (req, res) => {
     if(density) prompt += `The scene features ${density}. `;
     if(atmo) prompt += `The scene captures the atmosphere of ${atmo}. `;
     if(tech) prompt += `The image should have the quality of ${tech}. `;
-    
-    // 2. 전문가의 Boost 키워드 (테마에서 넘어온 것)
     if(themeBoost) prompt += `Ensure the image reflects ${themeBoost}. `;
     
     prompt += `Render in 8k resolution, sharp focus, cinematic lighting, and architectural photography style.`;
@@ -521,3 +497,4 @@ app.post('/api/generate', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+}
