@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================================================
-// 1. DATA_SHEET (V58 전체 데이터 완벽 이식)
+// 1. DATA_SHEET (V58 + New Density Options)
 // ==========================================================================
 const DATA_SHEET = {
     "country": [
@@ -83,36 +83,214 @@ const DATA_SHEET = {
         "underground (지하)", "treehouse canopy (나무 위)", "private island (개인 섬)", "tropical atoll (열대 산호섬)", 
         "meteor crater (운석 구덩이)", "lunar crater (달 분화구)", "mars canyon (화성 협곡)", "space station module (우주 정거장)", "golf course view (골프장 뷰)", "adjacent to park (공원 인접)"
     ],
-    "usage_mapping": {
-        "1.단독주택": ["Detached House (단독주택)", "Multi-unit House (다중주택)", "Daga-gu House (다가구주택)"],
-        "2.공동주택": ["Apartment (아파트)", "Row House (연립주택)", "Multi-family House (다세대주택)", "Dormitory (기숙사)"],
-        "3.제1종근린생활시설": ["Small Retail (소매점)", "Bakery/Cafe (휴게음식점)", "Barber/Beauty Shop (이용원/미용원)", "Clinic (의원)", "Public Library (공공도서관)"],
-        "4.제2종근린생활시설": ["Restaurant (일반음식점)", "Movie Theater (공연장)", "Church (종교집회장)", "Academy (학원)", "PC Room (다중생활시설)"],
-        "5.문화및집회시설": ["Concert Hall (공연장)", "Assembly Hall (집회장)", "Racecourse (경마장)", "Museum (박물관)", "Art Gallery (미술관)"],
-        "6.종교시설": ["Church (교회)", "Temple (성당/사찰)", "Religious Cloister (수도원)"],
-        "7.판매시설": ["Wholesale Market (도매시장)", "Retail Market (소매시장)", "Department Store (백화점)"],
-        "8.운수시설": ["Passenger Terminal (여객자동차터미널)", "Railway Station (철도역사)", "Airport (공항)", "Harbor (항만)"],
-        "9.의료시설": ["General Hospital (종합병원)", "Isolation Hospital (격리병원)"],
-        "10.교육연구시설": ["School (학교)", "Education Institute (교육원)", "Research Center (연구소)", "Library (도서관)"],
-        "11.노유자시설": ["Aged Care (노인복지시설)", "Children Care (아동복지시설)"],
-        "12.수련시설": ["Youth Hostel (유스호스텔)", "Training Center (연수원)"],
-        "13.운동시설": ["Gymnasium (체육관)", "Swimming Pool (운동장/수영장)"],
-        "14.업무시설": ["Public Office (공공청사)", "Office Building (오피스텔/일반업무)"],
-        "15.숙박시설": ["Hotel (일반숙박)", "Tourist Hotel (관광숙박)", "Dajung House (다중생활시설)"],
-        "16.위락시설": ["Casino (카지노)", "Nightclub (유흥주점)", "Race-betting Hall (무도장)"],
-        "17.공장": ["Manufacturing Plant (제조업소)", "Knowledge Center (지식산업센터)"],
-        "18.창고시설": ["Storage Warehouse (일반창고)", "Logistics Center (물류터미널)", "Cold Storage (냉동창고)"],
-        "19.위험물저장및처리": ["Gas Station (주유소)", "Liquid Fuel Depot (액체연료창고)", "Hazardous Warehouse (위험물창고)"],
-        "20.자동차관련시설": ["Car Park (주차장)", "Car Service Center (세차장/수리점)", "Driving School (운전학원)"],
-        "21.동물및식물관련시설": ["Livestock Shed (축사)", "Greenhouse (온실)", "Slaughterhouse (도축장)"],
-        "22.자원순환관련시설": ["Sewage Treatment (하수처리)", "Recycling Center (고물상/재활용)"],
-        "23.교정및군사시설": ["Correctional Center (교도소)", "Military Camp (군사시설)"],
-        "24.방송통신시설": ["Broadcasting Station (방송국)", "Telecom Center (전신전화국)", "Data Center (데이터센터)"],
-        "25.발전시설": ["Power Plant (발전소)", "Wind/Solar Farm (신재생에너지 발전소)"],
-        "26.묘지관련시설": ["Crematorium (화장시설)", "Ossuary (봉안당)", "Funeral Hall (묘지관리)"],
-        "27.관광휴게시설": ["Outdoor Theater (야외음악당)", "Rest Area (어린이회관/휴게소)"],
-        "28.장례시설": ["Funeral Home (장례식장)"],
-        "29.야영장시설": ["Camping Site (야영장)"]
+"usage_mapping": {
+        "1.단독주택": [
+            "Detached House (단독주택)", 
+            "Multi-unit House (다중주택/하숙)", 
+            "Multi-household House (다가구주택/원룸)", 
+            "Official Residence (공관)"
+        ],
+        "2.공동주택": [
+            "Apartment Complex (아파트 단지)", 
+            "Row House (연립주택/빌라 4층이하)", 
+            "Multi-family House (다세대주택/빌라)", 
+            "Dormitory (기숙사)"
+        ],
+        "3.제1종근린생활시설": [
+            "Supermarket (슈퍼마켓/소매점)", 
+            "Convenience Store (편의점)", 
+            "Bakery (제과점)", 
+            "Cafe/Tea House (휴게음식점)", 
+            "Hair Salon (미용원)", 
+            "Bathhouse (목욕장)", 
+            "Laundry Shop (세탁소)", 
+            "Medical Clinic (의원)", 
+            "Dental Clinic (치과의원)", 
+            "Oriental Medicine Clinic (한의원)", 
+            "Community Center (마을회관)", 
+            "Police Sub-station (파출소)", 
+            "Fire Station (소방서)", 
+            "Post Office (우체국)", 
+            "Public Library (공공도서관)"
+        ],
+        "4.제2종근린생활시설": [
+            "General Restaurant (일반음식점)", 
+            "Small Theater (소극장/공연장)", 
+            "Religious Assembly (작은 교회/성당)", 
+            "Academy/Hagwon (학원)", 
+            "PC Room (PC방)", 
+            "Billiards Hall (당구장)", 
+            "Real Estate Agency (부동산중개소)", 
+            "General Office (일반사무소)", 
+            "Karaoke/Noraebang (노래연습장)", 
+            "Screen Golf Range (스크린골프장)", 
+            "Fitness Center (체력단련장)", 
+            "Gosiwon (고시원/다중생활시설)"
+        ],
+        "5.문화및집회시설": [
+            "Concert Hall (대형 공연장)", 
+            "Opera House (오페라 하우스)", 
+            "Wedding Hall (예식장)", 
+            "Convention Center (회의장/컨벤션)", 
+            "Racecourse (경마장)", 
+            "Art Gallery (미술관)", 
+            "Museum (박물관)", 
+            "Science Museum (과학관)", 
+            "Zoo (동물원)", 
+            "Botanical Garden (식물원)", 
+            "Aquarium (수족관)"
+        ],
+        "6.종교시설": [
+            "Large Church (대형 교회)", 
+            "Cathedral (성당)", 
+            "Buddhist Temple (사찰)", 
+            "Religious Shrine (제실/사당)", 
+            "Enshrining Hall (봉안당)"
+        ],
+        "7.판매시설": [
+            "Wholesale Market (도매시장)", 
+            "Traditional Market (전통시장)", 
+            "Department Store (백화점)", 
+            "Shopping Mall (쇼핑센터)", 
+            "Large Hypermarket (대형마트)"
+        ],
+        "8.운수시설": [
+            "Bus Terminal (버스터미널)", 
+            "Railway Station (철도역)", 
+            "Subway Station (지하철역)", 
+            "Airport Terminal (공항 터미널)", 
+            "Ferry Terminal (여객부두)", 
+            "Logistics Warehouse (물류창고/터미널)"
+        ],
+        "9.의료시설": [
+            "General Hospital (종합병원)", 
+            "University Hospital (대학병원)", 
+            "Nursing Hospital (요양병원)", 
+            "Mental Hospital (정신병원)", 
+            "Isolation Hospital (격리병원)"
+        ],
+        "10.교육연구시설": [
+            "Kindergarten (유치원)", 
+            "Elementary School (초등학교)", 
+            "High School (중/고등학교)", 
+            "University Campus (대학교)", 
+            "Training Institute (연수원)", 
+            "Research Center (연구소)", 
+            "Large Library (대형 도서관)"
+        ],
+        "11.노유자시설": [
+            "Daycare Center (어린이집)", 
+            "Orphanage (아동복지시설)", 
+            "Nursing Home (노인요양시설)", 
+            "Senior Welfare Center (노인복지관)", 
+            "Social Welfare Center (사회복지관)"
+        ],
+        "12.수련시설": [
+            "Youth Training Center (청소년수련관)", 
+            "Youth Hostel (유스호스텔)", 
+            "Training Camp (수련원/캠프)"
+        ],
+        "13.운동시설": [
+            "Indoor Gymnasium (실내체육관)", 
+            "Large Stadium (경기장/스타디움)", 
+            "Swimming Pool (수영장)", 
+            "Bowling Alley (볼링장)", 
+            "Tennis Court (테니스장)"
+        ],
+        "14.업무시설": [
+            "City Hall (시청/구청)", 
+            "Police Headquarters (경찰서 본서)", 
+            "Tax Office (세무서)", 
+            "Office Skyscraper (고층 오피스 빌딩)", 
+            "Company Headquarters (사옥)", 
+            "Officetel (오피스텔)"
+        ],
+        "15.숙박시설": [
+            "Luxury Hotel (관광호텔)", 
+            "Business Hotel (비즈니스호텔)", 
+            "Resort Condominium (콘도/리조트)", 
+            "Hanok Hotel (한옥 호텔)", 
+            "Hostel (호스텔)"
+        ],
+        "16.위락시설": [
+            "Nightclub (나이트클럽/유흥주점)", 
+            "Casino (카지노)", 
+            "Amusement Park (유원지 시설)", 
+            "Dance Hall (무도장)"
+        ],
+        "17.공장": [
+            "General Factory (일반 공장)", 
+            "Manufacturing Plant (제조 공장)", 
+            "Food Processing Plant (식품 공장)", 
+            "Knowledge Industry Center (지식산업센터/아파트형공장)"
+        ],
+        "18.창고시설": [
+            "Large Warehouse (일반창고)", 
+            "Cold Storage (냉동/냉장창고)", 
+            "Logistics Center (물류센터)", 
+            "Container Yard (컨테이너 야적장)"
+        ],
+        "19.위험물저장및처리": [
+            "Gas Station (주유소)", 
+            "LPG Charging Station (LPG 충전소)", 
+            "Hydrogen Station (수소충전소)", 
+            "Oil Storage Tank (유류 저장소)", 
+            "Chemical Plant (화학 공장)"
+        ],
+        "20.자동차관련시설": [
+            "Parking Tower (주차타워/빌딩)", 
+            "Car Wash Center (대형 세차장)", 
+            "Car Repair Shop (정비공장)", 
+            "Junkyard (폐차장)", 
+            "Driving School (운전학원)"
+        ],
+        "21.동물및식물관련시설": [
+            "Livestock Barn (축사)", 
+            "Slaughterhouse (도축장)", 
+            "Large Greenhouse (대형 온실)", 
+            "Vertical Farm (스마트팜/수직농장)"
+        ],
+        "22.자원순환관련시설": [
+            "Sewage Treatment Plant (하수처리장)", 
+            "Recycling Center (고물상/재활용센터)", 
+            "Waste Incinerator (쓰레기 소각장)"
+        ],
+        "23.교정및군사시설": [
+            "Prison (교도소)", 
+            "Detention Center (구치소)", 
+            "Military Barracks (군부대 막사)", 
+            "Military Bunker (군사 벙커)"
+        ],
+        "24.방송통신시설": [
+            "Broadcasting Station (방송국)", 
+            "Radio Station (라디오 방송국)", 
+            "Data Center (데이터센터/IDC)", 
+            "Telecom Tower Building (통신국)"
+        ],
+        "25.발전시설": [
+            "Power Plant (화력/원자력 발전소)", 
+            "Solar Power Plant (태양광 발전소)", 
+            "Wind Farm (풍력 발전 단지)"
+        ],
+        "26.묘지관련시설": [
+            "Crematorium (화장장)", 
+            "Ossuary (납골당/봉안당)", 
+            "Cemetery Chapel (묘지 예배당)"
+        ],
+        "27.관광휴게시설": [
+            "Outdoor Amphitheater (야외 음악당)", 
+            "Observatory Tower (전망 타워)", 
+            "Highway Rest Area (고속도로 휴게소)"
+        ],
+        "28.장례시설": [
+            "Funeral Home (장례식장)", 
+            "Pet Funeral Hall (동물 장례식장)"
+        ],
+        "29.야영장시설": [
+            "Camping Site (일반 야영장)", 
+            "Auto Camping Site (자동차 야영장)", 
+            "Glamping Site (글램핑장)"
+        ]
     },
     "style": [
         "Minimalist (미니멀리즘)", "International Style (국제주의 양식)", "Bauhaus (바우하우스)", "Mid-Century Modern (미드센추리 모던)", "Industrial Chic (인더스트리얼 시크)", "Postmodernism (포스트모더니즘)", "Deconstructivist (해체주의)", "Tiny House Movement (타이니 하우스)", "Shipping Container (컨테이너 건축)", "Le Corbusier Style (르 코르뷔지에 스타일)", "Tadao Ando Style (안도 타다오 스타일)", "Frank Gehry Style (프랭크 게리 스타일)",
@@ -207,13 +385,32 @@ const DATA_SHEET = {
         "Camper Van (캠핑카)", "RV (캠핑카)", "Classic Vintage Car (클래식카)", "Golf Cart (골프 카트)", "Construction Truck (공사 트럭)", "Excavator (굴착기)", "Tractor (트랙터)", 
         "Self-driving Shuttle (자율주행)", "Flying Taxi (플라잉 택시/UAM)", "Drone (드론)", "Futuristic Pod (미래형 포드)", "Hovercraft (호버크래프트)", "Boat (보트)", "Yacht (요트)", "No Vehicles (차량 없음)"
     ],
-    "den": [
-        "No people (사람 없음)", "Sparse silhouettes (드문 실루엣)", "Single figure (한 명)", "Couple (커플)", "Small Group (소규모 그룹)", "Family (가족)", "Crowded (붐비는)", "Diverse Crowd (다양한 군중)", "Blurred Figures (흐릿한 인물)", "Silhouettes (실루엣)", 
-        "Business professionals (직장인들)", "Students (학생)", "Tourists (관광객)", "Shoppers (쇼핑객)", "Diners (식사하는 사람들)", "Commuters (통근자)", 
-        "Children (아이들)", "Teenagers (십대)", "Elderly (노인)", 
-        "Architects (건축가)", "Engineers (엔지니어)", "Workers (노동자)", "Police Officers (경찰)", 
-        "Artists (예술가)", "Musicians (음악가)", "Street Performers (거리 공연자)", "Fashion Models (패션 모델)", 
-        "Cyberpunks (사이버펑크족)", "Robots (로봇)", "Androids (안드로이드)", "Aliens (외계인)", "Ghosts (유령)", "Shadows (그림자)"
+    // 💎 [NEW] 밀도 3종 세트 (한영 병기)
+    "nature_density": [
+        "No Plants (식재 없음/인공적)",
+        "Sparse Potted Plants (드문드문한 화분)",
+        "Manicured Garden (잘 정돈된 정원)",
+        "Street Trees & Lawn (가로수와 잔디)",
+        "Lush Vegetation (무성한 식생/친환경)",
+        "Overgrown Jungle (뒤덮인 정글/폐허)",
+        "Vertical Gardens everywhere (수직 정원 도배)"
+    ],
+    "people_density": [
+        "No People (사람 없음/고요함)",
+        "Solitary Figure (단 한 명/스케일감)",
+        "Sparse Pedestrians (한산한 거리)",
+        "Casual Groups (일상적인 인파)",
+        "Bustling Crowd (북적이는 인파/상업지)",
+        "Packed Sea of People (인산인해/축제)"
+    ],
+    "vehicle_density": [
+        "No Cars (차량 없음/보행자 전용)",
+        "Few Parked Cars (주차된 차 소수)",
+        "Light Traffic (원활한 흐름)",
+        "Busy City Traffic (분주한 도심)",
+        "Traffic Jam (교통 체증/혼잡)",
+        "Motion Blur Cars (역동적인 차량 흐름)",
+        "Flying Traffic (비행 차량/SF)"
     ],
     "act": [
         "standing (서 있는)", "waiting (기다리는)", "queuing (줄 서 있는)", "sitting on benches (벤치에 앉은)", "lying down (누워 있는)", "sleeping (자고 있는)", "leaning (기대어 있는)", "looking up (올려다보는)", "reading (읽고 있는)", "checking phone (폰 보는)", 
@@ -425,7 +622,7 @@ app.get('/api/data', (req, res) => {
     });
 });
 
-// API 2: 나노 바나나 프롬프트 생성 (핵심 로직)
+// API 2: 나노 바나나 프롬프트 생성 (핵심 로직 - 밀도 3종 추가됨)
 app.post('/api/generate', (req, res) => {
     const { choices, themeBoost } = req.body; 
 
@@ -436,18 +633,24 @@ app.post('/api/generate', (req, res) => {
         return val.replace(/\(.*\)/, "").trim();
     };
 
-    // 🍌 [Nano Banana 엔진 로직]
-    const subjectParts = [getV('s5'), getV('s3'), getV('s4'), getV('s8')].filter(Boolean);
+    // 🍌 [Nano Banana 엔진 로직 - 누락 항목 완벽 반영됨]
+    // s24(Concept)와 s7(Scale/Floor) 추가됨
+    const subjectParts = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean);
     const subject = subjectParts.join(" ");
 
     const matParts = [getV('s6'), getV('s23')].filter(Boolean);
     const mat = matParts.join(" and ");
 
-    const envParts = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s20')].filter(Boolean);
+    // 환경 요소
+    const envParts = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean);
     const env = envParts.join(", specifically ");
 
     const atmoParts = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean);
     const atmosphere = atmoParts.join(", ");
+
+    // [업데이트] 밀도 요소: s25(Vehicle Type)와 s13(Action) 추가됨
+    const densityParts = [getV('s25'), getV('s29'), getV('s28'), getV('s13')].filter(Boolean);
+    const density = densityParts.join(", ");
 
     const techParts = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean);
     const tech = techParts.join(", ");
@@ -456,6 +659,7 @@ app.post('/api/generate', (req, res) => {
 
     if (mat) finalPrompt += `The structure is constructed primarily of ${mat}. `;
     if (env) finalPrompt += `It is situated in ${env}. `;
+    if (density) finalPrompt += `The scene features ${density}. `; 
     if (atmosphere) finalPrompt += `The scene captures the atmosphere of ${atmosphere}. `;
     if (tech) finalPrompt += `The image should have the quality of ${tech}. `;
 
