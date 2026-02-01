@@ -1,20 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js'); // 패키지 필요
+const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// 🔐 Supabase Admin 설정 (Render 환경변수 필수: SUPABASE_SERVICE_ROLE_KEY)
-const sbAdmin = createClient(
-    process.env.SUPABASE_URL || 'https://oitqyfqzocjmubqmvzfw.supabase.co',
-    process.env.SUPABASE_SERVICE_ROLE_KEY // 마스터 비밀 키
-);
+// 🔐 [SECURITY] Supabase Admin 설정
+// Render의 Environment Variables에 이 값들이 없으면 서버가 시작되지 않습니다.
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error("❌ CRITICAL ERROR: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing.");
+}
+
+const sbAdmin = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 // ==========================================================================
-// 1. DATA_SHEET (전체 데이터 풀 - 누락 없음)
+// 1. DATA_SHEET (누락 없는 전체 데이터)
 // ==========================================================================
 const DATA_SHEET = {
     "config": { "masters": [] },
@@ -410,7 +415,7 @@ const THEME_PRESETS = {
     ]
 };
 
-// API Endpoints
+// API Endpoints for Data
 app.get('/api/data', (req, res) => {
     res.json({ dataSheet: DATA_SHEET });
 });
@@ -427,57 +432,78 @@ app.get('/api/preset/:themeKey', (req, res) => {
 });
 
 // ==========================================================================
-// 3. SECURE API CONFIGURATION (보안 API 설정)
+// 3. PAYMENT & CREDIT SYSTEM (결제 및 충전 시스템)
 // ==========================================================================
 
-const { createClient } = require('@supabase/supabase-js');
+// 💰 결제 성공 시 크레딧 충전 API
+app.post('/api/charge-success', async (req, res) => {
+    const { userId, amount } = req.body;
 
-// 🔐 [SECURITY] Use Service Role Key in Render Environment Variables
-// [보안] Render 환경 변수에 SUPABASE_SERVICE_ROLE_KEY를 반드시 등록하세요.
-const sbAdmin = createClient(
-    process.env.SUPABASE_URL || 'https://oitqyfqzocjmubqmvzfw.supabase.co',
-    process.env.SUPABASE_SERVICE_ROLE_KEY // 마스터 비밀 키 (Master Secret Key)
-);
+    if (!userId || !amount) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        // 1. 현재 유저 정보 조회
+        const { data: userData, error: userError } = await sbAdmin.auth.admin.getUserById(userId);
+        if (userError || !userData) throw new Error("User not found");
+
+        // 2. 크레딧 계산 (정책: 2000원 = 100 Credits, 100원당 5크레딧)
+        const currentCredits = userData.user.user_metadata?.credits || 0;
+        const addCredits = Math.floor(amount / 20); // 2000 / 20 = 100 Credits
+        const newCredits = currentCredits + addCredits;
+
+        // 3. Supabase 메타데이터 업데이트 (크레딧 충전)
+        const { error: updateError } = await sbAdmin.auth.admin.updateUserById(userId, {
+            user_metadata: { credits: newCredits }
+        });
+
+        if (updateError) throw updateError;
+
+        console.log(`✅ Charged: User ${userId} (+${addCredits} credits)`);
+        res.json({ success: true, newCredits });
+
+    } catch (err) {
+        console.error("Charge Error:", err);
+        res.status(500).json({ error: "Failed to charge credits" });
+    }
+});
 
 // ==========================================================================
-// 4. INTEGRATED GENERATION API (통합된 보안 생성 API)
+// 4. GENERATION API (생성 및 차감 시스템)
 // ==========================================================================
 
 app.post('/api/generate', async (req, res) => {
     const { choices, themeBoost, userId } = req.body;
 
-    // 1. User Authentication Check (유저 인증 확인)
+    // 1. 유저 인증 확인
     if (!userId) {
         return res.status(401).json({ error: "Login required. (로그인이 필요합니다.)" });
     }
 
     try {
-        // 2. Server-side Credit Verification (서버에서 직접 크레딧 조회)
+        // 2. 서버에서 직접 크레딧 조회 (클라이언트 조작 방지)
         const { data: userData, error: userError } = await sbAdmin.auth.admin.getUserById(userId);
         if (userError || !userData) {
-            return res.status(404).json({ error: "User not found. (사용자를 찾을 수 없습니다.)" });
+            return res.status(404).json({ error: "User not found." });
         }
         
-        // 유저 메타데이터에서 크레딧 추출 (Extract credits from user metadata)
         let credits = userData.user.user_metadata?.credits || 0;
 
-        // 3. Balance Check (잔액 확인)
+        // 3. 잔액 확인
         if (credits <= 0) {
-            return res.status(403).json({ error: "No credits left. (크레딧이 부족합니다.)" });
+            return res.status(403).json({ error: "No credits left. Please Upgrade. (크레딧 부족)" });
         }
 
-        // 4. Prompt Refinement Logic (프롬프트 데이터 정제)
-        // 괄호 안의 한글 설명을 제거하고 영어 키워드만 남깁니다. (Remove Korean text in brackets)
+        // 4. 프롬프트 생성 로직
         const getV = (k) => choices[k] ? choices[k].replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim() : "";
 
-        // 키워드 조합 (Keyword Assembly)
         const subject = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean).join(" ");
         const mat = [getV('s6'), getV('s23')].filter(Boolean).join(" and ");
         const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean).join(", situated in ");
         const atmo = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean).join(", ");
         const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean).join(", ");
         
-        // 5. Professional Prompt Construction (전문가용 프롬프트 빌딩)
         let prompt = `**Professional architectural photography of a ${subject}**. `;
         if(mat) prompt += `Materiality: Crafted from ${mat}. `;
         if(env) prompt += `Context: Located in ${env}. `;
@@ -485,18 +511,17 @@ app.post('/api/generate', async (req, res) => {
         if(tech) prompt += `Tech Specs: ${tech}. `;
         if(themeBoost) prompt += `\n**Style Boost**: ${themeBoost}. `;
         
-        // AI 파라미터 및 품질 태그 (AI Parameters & Quality Tags)
         prompt += `\n--v 6.1 --style raw --ar ${getV('s18').replace("--ar ", "") || "1:1"} --q 2 --stylize 250`;
         prompt += `\nArchdaily masterpiece, sharp focus, magazine quality, clean composition, natural lighting --no text logo signature blurry words`;
 
-        // 6. Secure Credit Deduction (서버에서 안전하게 크레딧 1 차감)
+        // 5. 크레딧 1 차감
         const { error: updateError } = await sbAdmin.auth.admin.updateUserById(userId, {
             user_metadata: { credits: credits - 1 }
         });
 
         if (updateError) throw updateError;
 
-        // 7. Return Result & Remaining Balance (결과 및 남은 잔액 반환)
+        // 6. 결과 반환
         res.json({ 
             result: prompt, 
             remainingCredits: credits - 1 
@@ -504,14 +529,10 @@ app.post('/api/generate', async (req, res) => {
 
     } catch (err) {
         console.error("Server Error:", err);
-        res.status(500).json({ error: "Server error occurred. (서버 오류가 발생했습니다.)" });
+        res.status(500).json({ error: "Server error occurred." });
     }
 });
 
-// ==========================================================================
-// 5. SERVER START (서버 시작)
-// ==========================================================================
-
 app.listen(port, () => {
-    console.log(`🚀 MY ARCHITECT PRO Server running on port ${port}`);
+    console.log(`🚀 MY ARCHITECT PRO Server (v14.6) running on port ${port}`);
 });
