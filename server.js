@@ -1,10 +1,17 @@
 const express = require('express');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js'); // 패키지 필요
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// 🔐 Supabase Admin 설정 (Render 환경변수 필수: SUPABASE_SERVICE_ROLE_KEY)
+const sbAdmin = createClient(
+    process.env.SUPABASE_URL || 'https://oitqyfqzocjmubqmvzfw.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY // 마스터 비밀 키
+);
 
 // ==========================================================================
 // 1. DATA_SHEET (전체 데이터 풀 - 누락 없음)
@@ -264,190 +271,142 @@ const COMMON_TECH_SPECS = {
 };
 
 // ==========================================================================
-// 2. THEME PRESETS (15개 테마 + Tech Spec 고정)
+// 2. THEME PRESETS (15 Themes x 5 Variations = 75 Presets)
 // ==========================================================================
 const THEME_PRESETS = {
+    // 🏛️ HERITAGE (과거 / 전통)
     'heritage': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Traditional Hanok (전통 한옥)", s0: "South Korea (대한민국)", s1: "Seoul Bukchon (서울 북촌)", 
-            s6: "Korean Giwa (기와)", s2: "Narrow Golmok Alley (좁은 골목길)", s19: "Madang Courtyard (마당/중정)",
-            s8: "Courtyard House (중정형 주택)", s9: "Late Afternoon (늦은 오후)", s17: "Golden Hour (골든아워)",
-            s3: "1.단독주택", s4: "Detached House (단독주택)",
-            boost: "authentic cultural heritage, national geographic photography, highly detailed texture, warm atmosphere"
-        },
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Gothic Revival (고딕 리바이벌)", s0: "Europe (유럽)", s1: "London Victorian District (런던)",
-            s6: "Limestone (라임스톤)", s2: "historic district (역사 지구)", s19: "Manicured Lawn (잔디밭)",
-            s8: "Spire Top (첨탑)", s9: "Overcast (잔뜩 흐림)", s17: "Soft Diffused Light (확산광)",
-            s3: "6.종교시설", s4: "Cathedral (성당)",
-            boost: "monumental scale, cinematic history, dramatic lighting, sharp focus"
-        }
+        { ...COMMON_TECH_SPECS, s5: "Traditional Hanok (전통 한옥)", s0: "South Korea (대한민국)", s1: "Seoul Bukchon (서울 북촌)", s6: "Korean Giwa (기와)", s2: "Narrow Golmok Alley (좁은 골목길)", s19: "Madang Courtyard (마당)", s8: "Courtyard House (중정형 주택)", s9: "Late Afternoon (늦은 오후)", s3: "1.단독주택", s4: "Detached House", boost: "authentic cultural heritage, national geographic photography, highly detailed texture" },
+        { ...COMMON_TECH_SPECS, s5: "Gothic Revival (고딕 리바이벌)", s0: "Europe (유럽)", s1: "London Victorian District (런던)", s6: "Limestone (라임스톤)", s8: "Spire Top (첨탑)", s9: "Overcast (잔뜩 흐림)", s3: "6.종교시설", s4: "Cathedral", boost: "monumental scale, cinematic history, dramatic lighting, sharp focus" },
+        { ...COMMON_TECH_SPECS, s5: "Traditional Japanese (전통 일본식)", s0: "Asia / Middle East (아시아/중동)", s1: "Kyoto Zen Garden (교토)", s6: "Charred Wood (탄화목)", s19: "Zen Rock Garden (젠 정원)", s9: "Dawn Mist (새벽 안개)", s3: "15.숙박시설", s4: "Hanok Hotel", boost: "zen philosophy, wabi-sabi, peaceful morning, serene atmosphere" },
+        { ...COMMON_TECH_SPECS, s5: "Islamic Architecture (이슬람 양식)", s0: "Asia / Middle East (아시아/중동)", s1: "Istanbul Bosphorus (이스탄불)", s6: "Mosaic Tile (모자이크 타일)", s8: "Dome Structure (돔)", s9: "Sunset (일몰)", s3: "6.종교시설", s4: "Cathedral", boost: "intricate geometric patterns, majestic dome, arabesque details" },
+        { ...COMMON_TECH_SPECS, s5: "Neoclassical (신고전주의)", s0: "Europe (유럽)", s1: "Rome Colosseum Area (로마)", s6: "Marble (대리석)", s8: "Colonnade Walkway (열주 회랑)", s9: "High Noon (정오)", s3: "5.문화및집회시설", s4: "Museum", boost: "monumental pillars, timeless elegance, symmetrical composition" }
     ],
+
+    // 🏙️ MODERN (현재 / 모던)
     'modern': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Minimalist (미니멀리즘)", s0: "South Korea (대한민국)", s1: "Seoul Gangnam (서울 강남)",
-            s6: "Exposed Concrete (노출 콘크리트)", s2: "urban rooftop (도심 옥상)", s19: "Zen Rock Garden (젠 정원)",
-            s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s17: "Hard Light (강한 빛)",
-            s3: "2.공동주택", s4: "Row House (연립주택/빌라)",
-            boost: "archdaily featured, clean lines, modern architecture, pure geometry"
-        },
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Mid-Century Modern (미드센추리 모던)", s0: "USA / Americas (미주)", s1: "Los Angeles Beverly Hills (LA 비벌리힐스)",
-            s6: "White Stucco (화이트 스타코)", s2: "cliffside (절벽 끝)", s19: "Infinity Pool (인피니티 풀)",
-            s8: "Cantilevered (캔틸레버)", s9: "Sunset (일몰)", s17: "Warm Interior Glow (내부 조명)",
-            s3: "1.단독주택", s4: "Detached House (단독주택)",
-            boost: "luxury lifestyle, david hockney style, iconic design, clear sky"
-        }
+        { ...COMMON_TECH_SPECS, s5: "Minimalist (미니멀리즘)", s0: "South Korea (대한민국)", s1: "Seoul Gangnam (서울 강남)", s6: "Exposed Concrete (노출 콘크리트)", s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s3: "2.공동주택", s4: "Row House", boost: "archdaily featured, clean lines, tadao ando style, pure geometry" },
+        { ...COMMON_TECH_SPECS, s5: "Mid-Century Modern (미드센추리 모던)", s0: "USA / Americas (미주)", s1: "Los Angeles Beverly Hills (LA)", s6: "White Stucco (스타코)", s19: "Infinity Pool (인피니티 풀)", s8: "Cantilevered (캔틸레버)", s9: "Sunset (일몰)", s3: "1.단독주택", s4: "Detached House", boost: "luxury lifestyle, david hockney style, iconic design, clear sky" },
+        { ...COMMON_TECH_SPECS, s5: "Brutalist (브루탈리즘)", s0: "Europe (유럽)", s1: "Berlin Mitte (베를린)", s6: "Exposed Concrete (노출 콘크리트)", s8: "Monolithic Block (일체형 블록)", s9: "Overcast (잔뜩 흐림)", s3: "10.교육연구시설", s4: "University Campus", boost: "raw materiality, massive scale, bold geometry, le corbusier inspiration" },
+        { ...COMMON_TECH_SPECS, s5: "Bauhaus (바우하우스)", s0: "Europe (유럽)", s1: "Berlin Mitte (베를린)", s6: "Curtain Wall Glass (커튼월)", s8: "Grid Structure (격자 구조)", s3: "17.공장", s4: "Manufacturing Plant", boost: "functionalism, primary colors accent, industrial heritage, walter gropius" },
+        { ...COMMON_TECH_SPECS, s5: "Industrial Chic (인더스트리얼 시크)", s0: "South Korea (대한민국)", s1: "Seoul Seongsu (서울 성수)", s6: "Red Brick (붉은 벽돌)", s8: "Stacked Boxes (쌓인 박스)", s9: "Evening Glow (저녁 노을)", s3: "4.제2종근린생활시설", s4: "General Office", boost: "renovated warehouse, urban loft style, trendy atmosphere, exposed steel beams" }
     ],
+
+    // 🌿 ORGANIC (친환경 / 자연)
     'organic': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Biophilic (바이오필릭)", s0: "Asia / Middle East (아시아/중동)", s1: "Singapore Gardens by the Bay (싱가포르)",
-            s6: "Green Wall (수직 정원)", s2: "high-density block (고밀도 블록)", s19: "Vertical Gardens everywhere (수직 정원 도배)",
-            s8: "Fluid Organic (유기적 곡선)", s9: "Morning Haze (아침 안개)", s17: "Natural Sunlight (자연광)",
-            s3: "14.업무시설", s4: "Office Skyscraper (오피스 빌딩)",
-            boost: "sustainable architecture, eco-friendly, lush vegetation, harmony with nature"
-        }
+        { ...COMMON_TECH_SPECS, s5: "Biophilic (바이오필릭)", s0: "Asia / Middle East (아시아/중동)", s1: "Singapore Gardens by the Bay (싱가포르)", s6: "Green Wall (수직 정원)", s8: "Fluid Organic (유기적 곡선)", s9: "Morning Haze (아침 안개)", s3: "14.업무시설", s4: "Office Skyscraper", boost: "sustainable architecture, eco-friendly, lush vegetation, harmony with nature" },
+        { ...COMMON_TECH_SPECS, s5: "Organic Architecture (유기적 건축)", s0: "USA / Americas (미주)", s1: "Grand Canyon Edge (그랜드 캐년)", s6: "Sandstone (샌드스톤)", s8: "Fluid Organic (유기적 곡선)", s9: "Golden Hour (골든아워)", s3: "15.숙박시설", s4: "Resort Condominium", boost: "frank lloyd wright inspiration, blended with landscape, fallingwater style" },
+        { ...COMMON_TECH_SPECS, s5: "Bamboo Architecture (대나무 건축)", s0: "Asia / Middle East (아시아/중동)", s1: "Bali Ubud Jungle (발리)", s6: "Bamboo (대나무)", s19: "Jungle (정글)", s8: "Fluid Organic (유기적 곡선)", s9: "Rainy (비오는)", s3: "15.숙박시설", s4: "Boutique Hotel", boost: "sustainable craft, tropical paradise, intricate bamboo structure" },
+        { ...COMMON_TECH_SPECS, s5: "Earthship (어스십)", s0: "Nature / Wild (대자연)", s1: "Sahara Desert Oasis (사하라)", s6: "Rammed Earth (다짐 흙)", s8: "Single-story (단층)", s9: "High Noon (정오)", s3: "1.단독주택", s4: "Detached House", boost: "off-grid living, thermal mass architecture, eco-conscious, unique desert form" },
+        { ...COMMON_TECH_SPECS, s5: "Vertical Farm (수직 농장)", s0: "South Korea (대한민국)", s1: "Seoul Mapo-gu (서울 마포)", s6: "Glass and Steel (유리와 철강)", s19: "Vertical Garden (수직 정원)", s8: "Stacked Slabs (쌓인 슬래브)", s9: "Midday Sun (한낮)", s3: "21.동물및식물관련시설", s4: "Vertical Farm", boost: "urban agriculture, smart city, sustainable food source, glasshouse aesthetic" }
     ],
+
+    // 🚀 HI-TECH (미래 / 기술)
     'hitech': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Neo-Futurism (네오 퓨처리즘)", s0: "South Korea (대한민국)", s1: "Seoul Dongdaemun DDP Area (서울 동대문)",
-            s6: "Titanium Panel (티타늄 패널)", s2: "Pedestrian Plaza (광장)", s19: "No Plants (식재 없음/인공적)",
-            s8: "Fluid Organic (유기적 곡선)", s9: "Blue Hour (블루아워)", s17: "LED Strip Lights (LED 라인 조명)",
-            s3: "5.문화및집회시설", s4: "Art Gallery (미술관)",
-            boost: "zaha hadid style, parametric design, futuristic curves, metallic texture"
-        }
+        { ...COMMON_TECH_SPECS, s5: "Neo-Futurism (네오 퓨처리즘)", s0: "South Korea (대한민국)", s1: "Seoul Dongdaemun DDP Area (서울 동대문)", s6: "Titanium Panel (티타늄 패널)", s8: "Fluid Organic (유기적 곡선)", s9: "Blue Hour (블루아워)", s3: "5.문화및집회시설", s4: "Art Gallery", boost: "zaha hadid style, parametric design, futuristic curves, metallic texture" },
+        { ...COMMON_TECH_SPECS, s5: "High-Tech (하이테크)", s0: "Europe (유럽)", s1: "Parisian Street (파리)", s6: "Steel and Glass (강철과 유리)", s8: "Exoskeleton (외골격 구조)", s9: "Night (밤)", s3: "5.문화및집회시설", s4: "Museum", boost: "exposed structure, pompidou center inspiration, machinery aesthetic" },
+        { ...COMMON_TECH_SPECS, s5: "Smart City Hub (스마트 시티 허브)", s0: "South Korea (대한민국)", s1: "Pangyo Techno Valley (판교)", s6: "Smart Glass (스마트 글라스)", s8: "Modular Stack (모듈러 스택)", s9: "High Noon (정오)", s3: "14.업무시설", s4: "Company Headquarters", boost: "clean tech-campus, automated facade, minimalist future, high-efficiency" },
+        { ...COMMON_TECH_SPECS, s5: "Parametric Mesh (파라메트릭 메쉬)", s0: "Asia / Middle East (아시아/중동)", s1: "Dubai Marina (두바이)", s6: "Aluminum (알루미늄)", s8: "Twisted Spiral (나선형)", s9: "Golden Hour (골든아워)", s3: "14.업무시설", s4: "Office Skyscraper", boost: "complex geometry, computational design, luxury skyscraper, shimmering surface" },
+        { ...COMMON_TECH_SPECS, s5: "Kinetic Facade (가변 파사드)", s0: "USA / Americas (미주)", s1: "Modern Manhattan (맨해튼)", s6: "Titanium Panel (티타늄 패널)", s8: "Skyscraper (마천루)", s9: "Sunset (일몰)", s3: "14.업무시설", s4: "Office Skyscraper", boost: "moving parts, adaptive facade, high-tech movement, architectural innovation" }
     ],
-    'ocean': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Resort Condominium (콘도/리조트)", s0: "Nature / Wild (대자연/오지)", s1: "Maldives Overwater (몰디브 수상)",
-            s6: "Thatch Roof (초가지붕)", s2: "floating on water (수상)", s19: "Ocean (바다)",
-            s8: "Stilt House (고상 가옥)", s9: "Midday Sun (한낮)", s17: "Direct Sunlight (직사광)",
-            s3: "15.숙박시설", s4: "Resort Condominium (리조트)",
-            boost: "crystal clear water, luxury travel, relaxing vibe, vacation photography"
-        },
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Modern (모던)", s0: "South Korea (대한민국)", s1: "Jeju Volcanic Coast (제주 해안)",
-            s6: "Basalt (현무암)", s2: "rocky coastline (바위 해안)", s19: "Ocean (바다)",
-            s8: "Low-rise (저층)", s9: "Windy (바람부는)", s17: "Dramatic Sky (드라마틱한 하늘)",
-            s3: "3.제1종근린생활시설", s4: "Cafe/Tea House (휴게음식점)",
-            boost: "melancholic atmosphere, emotional scenery, jeju island vibe, cinematic"
-        }
-    ],
-    'night': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Cyberpunk (사이버펑크)", s0: "Asia / Middle East (아시아/중동)", s1: "Cyberpunk Neo-Tokyo (도쿄)",
-            s6: "Curtain Wall Glass (커튼월)", s2: "Intersection (교차로)", s19: "No Plants (식재 없음/인공적)",
-            s8: "Skyscraper (마천루)", s9: "Deep Night (심야)", s17: "Neon Lights (네온)",
-            s3: "16.위락시설", s4: "Nightclub (나이트클럽)",
-            boost: "blade runner vibe, rain reflections, wet asphalt, cinematic bokeh"
-        }
-    ],
-    'forest': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Rustic Cabin (러스틱 캐빈)", s0: "Nature / Wild (대자연/오지)", s1: "Rocky Mountains (록키 산맥)",
-            s6: "Weathered Barn Wood (고재)", s2: "forest clearing (숲속 공터)", s19: "Pine Trees (소나무)",
-            s8: "Single-story (단층)", s9: "Morning Mist (아침 안개)", s17: "Diffused Light (확산광)",
-            s3: "1.단독주택", s4: "Detached House (단독주택)",
-            boost: "mysterious atmosphere, secluded, nature photography, earthy tones"
-        },
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Modern (모던)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)",
-            s6: "Glass and Steel", s2: "mountain peak (산 정상)", s19: "Forest (숲)",
-            s8: "Cantilevered (캔틸레버)", s9: "Sunrise (일출)", s17: "Golden Hour (골든아워)",
-            s3: "15.숙박시설", s4: "Resort Condominium (리조트)",
-            boost: "fallingwater style, forest retreat, nature connection"
-        }
-    ],
-    'desert': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Modern (모던)", s0: "Nature / Wild (대자연/오지)", s1: "Sahara Desert Oasis (사하라 사막 오아시스)",
-            s6: "Rammed Earth (다짐 흙)", s2: "desert dunes (사막 언덕)", s19: "Cactus Garden (선인장)",
-            s8: "Cubic Box (정육면체)", s9: "High Noon (정오)", s17: "Hard Light (강한 빛)",
-            s3: "15.숙박시설", s4: "Luxury Hotel (관광호텔)",
-            boost: "dune movie style, warm aesthetic, minimal, vast landscape"
-        }
-    ],
-    'snow': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Scandivavian (북유럽식)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)",
-            s6: "CLT Timber (구조용 목재)", s2: "mountain peak (산 정상)", s19: "Forest (숲)",
-            s8: "A-Frame", s9: "Snowy (눈 내리는)", s17: "Warm Interior Glow (내부 조명)",
-            s3: "15.숙박시설", s4: "Resort Condominium (리조트)",
-            boost: "winter wonderland, cozy atmosphere, snow particles, cold blue tones"
-        }
-    ],
-    'resort': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Mediterranean (지중해식)", s0: "Asia / Middle East (아시아/중동)", s1: "Bali Ubud Jungle (발리 우붓 정글)",
-            s6: "Bamboo (대나무)", s2: "cliffside (절벽 끝)", s19: "Infinity Pool (인피니티 풀)",
-            s8: "Terraced (테라스형)", s9: "Sunset (일몰)", s17: "Golden Hour (골든아워)",
-            s3: "15.숙박시설", s4: "Boutique Hotel (부띠끄 호텔)",
-            boost: "award winning hotel design, 5-star luxury, tropical vacation, relaxing"
-        }
-    ],
-    'cyber': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "High-Tech (하이테크)", s0: "Asia / Middle East (아시아/중동)", s1: "Hong Kong Neon Street (홍콩)",
-            s6: "Media Facade (미디어 파사드)", s2: "high-density block (고밀도 블록)", s19: "No Plants (식재 없음/인공적)",
-            s8: "Mega-tall Structure (메가톨)", s9: "Rainy (비오는)", s17: "Neon Lights (네온)",
-            s3: "14.업무시설", s4: "Office Skyscraper (고층 오피스 빌딩)",
-            boost: "cyberpunk 2077 style, dystopian future, holographic signs, busy street"
-        }
-    ],
-    'ruins': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Brutalist (브루탈리즘)", s0: "Europe (유럽)", s1: "Chernobyl Exclusion Zone",
-            s6: "Exposed Concrete (노출 콘크리트)", s2: "within urban ruins (유적지)", s19: "Overgrown Jungle (뒤덮인 정글/폐허)",
-            s8: "Monolithic Block (일체형 블록)", s9: "Overcast (잔뜩 흐림)", s17: "Gloomy (우울한 날씨)",
-            s3: "17.공장", s4: "General Factory (일반 공장)",
-            boost: "the last of us style, post-apocalyptic, abandoned, decay, nature taking over"
-        }
-    ],
-    'space': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Space Age (스페이스 에이지)", s0: "Sci-Fi / Space (우주/미래)", s1: "Mars Colony (화성 식민지)",
-            s6: "Titanium Panel (티타늄 패널)", s2: "mars canyon (화성 협곡)", s19: "No Plants (식재 없음/인공적)",
-            s8: "Geodesic Dome (지오데식 돔)", s9: "Starry Night (별밤)", s17: "Cinematic Lighting (영화 조명)",
-            s3: "10.교육연구시설", s4: "Research Center (연구소)",
-            boost: "interstellar movie style, realistic sci-fi, 8k render, nasa punk"
-        }
-    ],
-    'underwater': [
-        { 
-            ...COMMON_TECH_SPECS,
-            s5: "Futurism (퓨처리즘)", s0: "Nature / Wild (대자연/오지)", s1: "Underwater City (수중 도시)",
-            s6: "Thick Glass (두꺼운 유리)", s2: "underwater reef (수중 산호초)", s19: "Coral Reef",
-            s8: "Bubble Architecture", s9: "Deep Night (심야)", s17: "Bioluminescence (생체 발광)",
-            s3: "10.교육연구시설", s4: "Research Center (연구소)",
-            boost: "avatar way of water style, marine life, caustic lighting, deep blue"
-        }
-    ],
+
+    // 🛸 SCI-FI (우주 / 초미래)
     'scifi': [
-        {
-            ...COMMON_TECH_SPECS,
-            s5: "Parametric (파라메트릭)", s0: "Sci-Fi / Space (우주/미래)", s1: "Cloud City (공중 도시)",
-            s6: "White Stucco (화이트 스타코)", s2: "floating platform (부유식 플랫폼)", s19: "Vertical Garden (수직 정원)",
-            s8: "Fluid Organic (유기적 곡선)", s9: "Clear Sky (맑음)", s17: "Bright Sunlight",
-            s3: "1.단독주택", s4: "Detached House (단독주택)",
-            boost: "utopian future, clean composition, solarpunk, aerial view"
-        }
+        { ...COMMON_TECH_SPECS, s5: "Solarpunk (솔라펑크)", s0: "Asia / Middle East (아시아/중동)", s1: "Singapore Gardens by the Bay (싱가포르)", s6: "Photovoltaic Glass (태양광 유리)", s19: "Vertical Garden (수직 정원)", s8: "Fluid Organic (유기적 곡선)", s9: "Sunny with Clouds (구름 낀 맑음)", s3: "14.업무시설", s4: "Office Skyscraper", boost: "utopian future, lush greenery integrated with technology, clean energy" },
+        { ...COMMON_TECH_SPECS, s5: "Space Age (스페이스 에이지)", s0: "Sci-Fi / Space (우주)", s1: "Moon Surface Base (달 기지)", s6: "Titanium Panel (티타늄 패널)", s8: "Geodesic Dome (지오데식 돔)", s9: "Starry Night (별밤)", s3: "10.교육연구시설", s4: "Research Center", boost: "lunar colony, harsh shadows, crater landscape, futuristic pods, realistic sci-fi" },
+        { ...COMMON_TECH_SPECS, s5: "Cloud City (공중 도시)", s0: "Sci-Fi / Space (우주)", s1: "Cloud City (공중 도시)", s6: "White Stucco (화이트 스타코)", s8: "Fluid Organic (유기적 곡선)", s9: "Clear Sky (맑음)", s3: "1.단독주택", s4: "Detached House", boost: "utopian future, clean composition, ethereal atmosphere, floating in clouds" },
+        { ...COMMON_TECH_SPECS, s5: "Mars Colony Hub (화성 기지)", s0: "Sci-Fi / Space (우주)", s1: "Mars Colony (화성)", s6: "Fiberglass (유리섬유)", s8: "Nested Volumes (중첩 볼륨)", s9: "Dust Storm (모래폭풍)", s3: "10.교육연구시설", s4: "Research Center", boost: "interstellar movie style, red dust, futuristic survival, nasa punk" },
+        { ...COMMON_TECH_SPECS, s5: "Cybernetic Hub (사이버네틱 허브)", s0: "Sci-Fi / Space (우주)", s1: "Underwater City (수중 도시)", s6: "Dichroic Glass (다이크로익 유리)", s8: "Spherical (구형)", s9: "Deep Night (심야)", s3: "14.업무시설", s4: "Company Headquarters", boost: "high-tech underground, glowing wires, sub-aquatic future, advanced biology" }
+    ],
+
+    // 🌙 NIGHT (야경 / 네온)
+    'night': [
+        { ...COMMON_TECH_SPECS, s5: "Cyberpunk (사이버펑크)", s0: "Asia / Middle East (아시아/중동)", s1: "Hong Kong Neon Street (홍콩)", s6: "Curtain Wall Glass (커튼월)", s9: "Deep Night (심야)", s17: "Neon Lights (네온)", s3: "16.위락시설", s4: "Nightclub", boost: "neon signage, rain reflection, blade runner style, crowded alley" },
+        { ...COMMON_TECH_SPECS, s5: "Noir Atmosphere (느와르 분위기)", s0: "USA / Americas (미주)", s1: "New York Brooklyn (뉴욕)", s6: "Red Brick (붉은 벽돌)", s9: "Midnight (자정)", s17: "Dramatic Lighting (드라마틱 조명)", s3: "14.업무시설", s4: "General Office", boost: "dramatic shadows, misty street lamp, cinematic noir film style" },
+        { ...COMMON_TECH_SPECS, s5: "Neon Favela (네온 빈민가)", s0: "USA / Americas (미주)", s1: "Rio Copacabana (리오)", s6: "Corrugated Metal (골함석)", s9: "Night (밤)", s17: "Neon Lights (네온)", s3: "2.공동주택", s4: "Apartment Complex", boost: "glowing wires, dense urban fabric, vibrant neon colors, gritty" },
+        { ...COMMON_TECH_SPECS, s5: "Luxury Skybar (럭셔리 스카이바)", s0: "South Korea (대한민국)", s1: "Seoul Yeouido (서울 여의도)", s6: "Polished Steel (폴리싱 스틸)", s9: "Blue Hour (블루아워)", s17: "City Lights (도시 조명)", s3: "4.제2종근린생활시설", s4: "General Restaurant", boost: "infinity view, high-end interior, evening city lights, elegant" },
+        { ...COMMON_TECH_SPECS, s5: "Vegas Neon (베가스 네온)", s0: "USA / Americas (미주)", s1: "Miami Art Deco District (마이애미)", s6: "White Stucco (화이트 스타코)", s9: "Night (밤)", s17: "Neon Lights (네온)", s3: "15.숙박시설", s4: "Luxury Hotel", boost: "retro neon lights, art deco facade, palm trees at night, festive" }
+    ],
+
+    // 🌲 FOREST (숲 / 안개)
+    'forest': [
+        { ...COMMON_TECH_SPECS, s5: "Rustic Cabin (러스틱 캐빈)", s0: "Nature / Wild (대자연)", s1: "Rocky Mountains (록키 산맥)", s6: "Weathered Barn Wood (고재)", s19: "Pine Trees (소나무)", s9: "Morning Mist (아침 안개)", s3: "1.단독주택", s4: "Detached House", boost: "cozy fireplace, secluded forest, natural wood texture, birds view" },
+        { ...COMMON_TECH_SPECS, s5: "Modern Forest House (모던 숲 하우스)", s0: "Europe (유럽)", s1: "Scandinavian Fjord (북유럽)", s6: "Steel and Glass (강철과 유리)", s19: "Forest (숲)", s9: "Sunrise (일출)", s3: "1.단독주택", s4: "Detached House", boost: "minimalist glass box, forest reflection, dawn sunlight, peaceful" },
+        { ...COMMON_TECH_SPECS, s5: "Jungle Temple (정글 템플)", s0: "Asia / Middle East (아시아/중동)", s1: "Vietnam Ha Long Bay (베트남)", s6: "Sandstone (샌드스톤)", s19: "Jungle (정글)", s9: "Humid (습한)", s3: "6.종교시설", s4: "Buddhist Temple", boost: "ancient overgrown ruins, deep jungle, misty atmosphere, mysterious" },
+        { ...COMMON_TECH_SPECS, s5: "Redwood Lodge (레드우드 로지)", s0: "USA / Americas (미주)", s1: "Vancouver Seawall (밴쿠버)", s6: "CLT Timber (목재)", s19: "Pine Trees (소나무)", s9: "Late Afternoon (늦은 오후)", s3: "15.숙박시설", s4: "Resort Condominium", boost: "massive tree trunks, high ceiling, warm interior, alpine forest" },
+        { ...COMMON_TECH_SPECS, s5: "Birch Pavilion (자작나무 파빌리온)", s0: "Europe (유럽)", s1: "Norwegian Village (노르웨이)", s6: "Light Wood (밝은 목재)", s19: "Birch Forest (자작나무 숲)", s9: "Morning Haze (아침 안개)", s3: "5.문화및집회시설", s4: "Art Gallery", boost: "white birch trees, soft morning light, ethereal and calm, vertical lines" }
+    ],
+
+    // 🏜️ DESERT (사막 / 듄)
+    'desert': [
+        { ...COMMON_TECH_SPECS, s5: "Desert Dune Villa (사막 듄 빌라)", s0: "Nature / Wild (대자연)", s1: "Sahara Desert Oasis (사하라)", s6: "Rammed Earth (다짐 흙)", s19: "Desert Flora (사막 식물)", s9: "Sunset (일몰)", s3: "1.단독주택", s4: "Detached House", boost: "dune movie aesthetic, sand particles, warm orange glow, vast dunes" },
+        { ...COMMON_TECH_SPECS, s5: "Sandstone Fortress (사막 요새)", s0: "Asia / Middle East (아시아/중동)", s1: "Petra Ancient City (페트라)", s6: "Sandstone (샌드스톤)", s9: "High Noon (정오)", s3: "15.숙박시설", s4: "Luxury Hotel", boost: "carved into rock, historical mystery, harsh sunlight, desert wind" },
+        { ...COMMON_TECH_SPECS, s5: "Mirrored Box (거울 박스)", s0: "Nature / Wild (대자연)", s1: "Grand Canyon Edge (그랜드 캐년)", s6: "Curtain Wall Glass (커튼월)", s9: "Golden Hour (골든아워)", s3: "3.제1종근린생활시설", s4: "Cafe/Tea House", boost: "invisible architecture, reflecting desert, spectacular view, minimal" },
+        { ...COMMON_TECH_SPECS, s5: "Adobe Village (어도비 마을)", s0: "USA / Americas (미주)", s1: "Mexico City Zocalo (멕시코)", s6: "Adobe Mud (흙벽)", s9: "Midday Sun (한낮)", s3: "2.공동주택", s4: "Row House", boost: "traditional craft, rounded edges, vibrant desert life, terracotta tones" },
+        { ...COMMON_TECH_SPECS, s5: "Solar Array Hub (태양광 허브)", s0: "Nature / Wild (대자연)", s1: "Grand Canyon Edge (그랜드 캐년)", s6: "Photovoltaic Glass (태양광 유리)", s9: "High Noon (정오)", s3: "25.발전시설", s4: "Solar Power Plant", boost: "futuristic energy, vast mirrors, high-tech desert, sci-fi landscape" }
+    ],
+
+    // ❄️ SNOW (설경 / 겨울)
+    'snow': [
+        { ...COMMON_TECH_SPECS, s5: "Ice Hotel (아이스 호텔)", s0: "Europe (유럽)", s1: "Reykjavik Ice Field (레이캬비크)", s6: "Frosted Glass (반투명 유리)", s9: "Blue Hour (블루아워)", s3: "15.숙박시설", s4: "Luxury Hotel", boost: "glowing blue ice, crystal structures, arctic night, ethereal" },
+        { ...COMMON_TECH_SPECS, s5: "Alpine Chalet (알프스 샬레)", s0: "Europe (유럽)", s1: "Swiss Alpine (알프스)", s6: "Charred Wood (탄화목)", s9: "Snowy (눈 내리는)", s3: "15.숙박시설", s4: "Resort Condominium", boost: "warm lights inside, heavy snow on roof, cozy winter vibe" },
+        { ...COMMON_TECH_SPECS, s5: "Arctic Research (북극 연구소)", s0: "Nature / Wild (대자연)", s1: "Antarctica Research Station (남극 기지)", s6: "Titanium Panel (티타늄 패널)", s9: "Polar Night (극야)", s3: "10.교육연구시설", s4: "Research Center", boost: "high-tech isolation, glowing windows, aurora borealis, icy ground" },
+        { ...COMMON_TECH_SPECS, s5: "Modern Glass Igloo (모던 유리 이글루)", s0: "Europe (유럽)", s1: "Scandinavian Fjord (북유럽)", s6: "Glass Block (유리 블록)", s9: "Starlight (별빛)", s3: "1.단독주택", s4: "Detached House", boost: "seeing stars from bed, futuristic igloo, cold exterior vs warm interior" },
+        { ...COMMON_TECH_SPECS, s5: "Snowy Temple (눈 덮인 사찰)", s0: "South Korea (대한민국)", s1: "Gyeongju Bulguksa Temple (경주)", s6: "Korean Giwa (기와)", s9: "Morning Mist (아침 안개)", s3: "6.종교시설", s4: "Buddhist Temple", boost: "white snow on black tiles, traditional quietness, meditative" }
+    ],
+
+    // 🌊 OCEAN (바다 / 휴양)
+    'ocean': [
+        { ...COMMON_TECH_SPECS, s5: "Overwater Villa (수상 빌라)", s0: "Nature / Wild (대자연)", s1: "Maldives Overwater (몰디브)", s6: "Thatch Roof (초가지붕)", s9: "Midday Sun (한낮)", s3: "15.숙박시설", s4: "Resort Condominium", boost: "turquoise water, floating life, vacation paradise, bright and airy" },
+        { ...COMMON_TECH_SPECS, s5: "Coastal Cliff House (해안 절벽 집)", s0: "Europe (유럽)", s1: "Santorini White (산토리니)", s6: "White Stucco (화이트 스타코)", s9: "Sunset (일몰)", s3: "1.단독주택", s4: "Detached House", boost: "edge of the world, deep blue sea, Aegean breeze, luxury living" },
+        { ...COMMON_TECH_SPECS, s5: "Modern Lighthouse (모던 등대)", s0: "South Korea (대한민국)", s1: "Jeju Volcanic Coast (제주 해안)", s6: "Exposed Concrete (노출 콘크리트)", s9: "Stormy (폭풍우)", s3: "27.관광휴게시설", s4: "Observatory Tower", boost: "dramatic waves, crashing water, strong architecture, lighthouse beam" },
+        { ...COMMON_TECH_SPECS, s5: "Salt Flat Pavilion (소금 사막 파빌리온)", s0: "Nature / Wild (대자연)", s1: "Bolivia Salt Flat (볼리비아)", s6: "Mirrored Glass (거울 유리)", s9: "Blue Hour (블루아워)", s3: "5.문화및집회시설", s4: "Art Gallery", boost: "perfect reflection, horizon merging, surreal sky, white salt ground" },
+        { ...COMMON_TECH_SPECS, s5: "Industrial Port Hub (산업 항구 허브)", s0: "South Korea (대한민국)", s1: "Busan Marine City (부산)", s6: "Steel and Glass (강철과 유리)", s9: "Night (밤)", s3: "8.운수시설", s4: "Airport Terminal", boost: "busan port view, glowing bridge, harbor lights, high-density city" }
+    ],
+
+    // 🍹 RESORT (럭셔리 / 호텔)
+    'resort': [
+        { ...COMMON_TECH_SPECS, s5: "Luxury Infinity Resort (럭셔리 인피니티 리조트)", s0: "Asia / Middle East (아시아/중동)", s1: "Bali Ubud Jungle (발리)", s6: "Bamboo (대나무)", s19: "Infinity Pool (인피니티 풀)", s9: "Sunset (일몰)", s3: "15.숙박시설", s4: "Luxury Hotel", boost: "infinity pool, jungle canopy, tropical luxury, warm sunset glow" },
+        { ...COMMON_TECH_SPECS, s5: "Mediterranean Spa (지중해 스파)", s0: "Europe (유럽)", s1: "Barcelona Eixample (바르셀로나)", s6: "Marble (대리석)", s9: "Sunny with Clouds (구름 낀 맑음)", s3: "15.숙박시설", s4: "Boutique Hotel", boost: "wellness retreat, white columns, peaceful courtyard, soft shadows" },
+        { ...COMMON_TECH_SPECS, s5: "Safari Lodge (사파리 로지)", s0: "Nature / Wild (대자연)", s1: "Cape Town Table Mountain (케이프타운)", s6: "Rammed Earth (다짐 흙)", s9: "Golden Hour (골든아워)", s3: "15.숙박시설", s4: "Luxury Hotel", boost: "wildlife view, sunset savanna, high-end tent design, earthy textures" },
+        { ...COMMON_TECH_SPECS, s5: "Ski Resort (스키 리조트)", s0: "Europe (유럽)", s1: "Pyeongchang Alpensia (평창)", s6: "Light Wood (밝은 목재)", s9: "Evening Glow (저녁 노을)", s3: "15.숙박시설", s4: "Resort Condominium", boost: "ski-in ski-out, snowy mountains, vibrant night skiing lights" },
+        { ...COMMON_TECH_SPECS, s5: "Wellness Retreat (웰니스 리트리트)", s0: "South Korea (대한민국)", s1: "Jeju Bijarim Forest (제주 비자림)", s6: "Basalt (현무암)", s19: "Forest (숲)", s9: "Morning Mist (아침 안개)", s3: "15.숙박시설", s4: "Boutique Hotel", boost: "healing forest, volcanic stone, quiet morning, misty meditation" }
+    ],
+
+    // 👾 CYBERPUNK (사이버펑크)
+    'cyber': [
+        { ...COMMON_TECH_SPECS, s5: "Neon Market (네온 마켓)", s0: "Asia / Middle East (아시아/중동)", s1: "Osaka Dotonbori (오사카)", s6: "Holographic Projection (홀로그램)", s9: "Deep Night (심야)", s3: "7.판매시설", s4: "Traditional Market", boost: "chaotic neon signs, street food smoke, holographic ads, wet floor" },
+        { ...COMMON_TECH_SPECS, s5: "Megastructure (메가스트럭처)", s0: "Asia / Middle East (아시아/중동)", s1: "Kuala Lumpur Petronas (쿠알라룸푸르)", s6: "Titanium Panel (티타늄 패널)", s9: "Blue Hour (블루아워)", s3: "14.업무시설", s4: "Office Skyscraper", boost: "towering scale, skybridges, glowing city grid, sci-fi skyline" },
+        { ...COMMON_TECH_SPECS, s5: "Data-Hub Alley (데이터 허브 골목)", s0: "South Korea (대한민국)", s1: "Seoul Euljiro (서울 을지로)", s6: "Corrugated Metal (골함석)", s9: "Night (밤)", s3: "24.방송통신시설", s4: "Data Center", boost: "gritty tech, retro-future, narrow alley, glowing server lights" },
+        { ...COMMON_TECH_SPECS, s5: "Hacker Den (해커 소굴)", s0: "Asia / Middle East (아시아/중동)", s1: "Mumbai Slum Contrast (뭄바이)", s6: "Recycled Plastic (플라스틱)", s9: "Midnight (자정)", s3: "2.공동주택", s4: "Dormitory", boost: "low life high tech, messy wires, multi-layered city, gritty texture" },
+        { ...COMMON_TECH_SPECS, s5: "Sky-Port (스카이 포트)", s0: "Sci-Fi / Space (우주)", s1: "Cloud City (공중 도시)", s6: "Polished Steel (폴리싱 스틸)", s9: "Dawn (새벽)", s3: "8.운수시설", s4: "Airport Terminal", boost: "flying car landing, morning sky, futuristic transit, high-fidelity" }
+    ],
+
+    // 🧱 RUINS (폐허 / 유적)
+    'ruins': [
+        { ...COMMON_TECH_SPECS, s5: "Overgrown Factory (뒤덮인 공장)", s0: "South Korea (대한민국)", s1: "Cheongju Tobacco Plant (청주)", s6: "Red Brick (붉은 벽돌)", s19: "Overgrown Jungle (정글)", s9: "Overcast (잔뜩 흐림)", s3: "17.공장", s4: "General Factory", boost: "the last of us style, nature taking over, rusted steel, mossy walls" },
+        { ...COMMON_TECH_SPECS, s5: "Sunken Temple (침몰한 신전)", s0: "Asia / Middle East (아시아/중동)", s1: "Cambodia Angkor Wat (앙코르와트)", s6: "Sandstone (샌드스톤)", s19: "Jungle (정글)", s9: "Dawn Mist (새벽 안개)", s3: "6.종교시설", s4: "Buddhist Temple", boost: "roots growing through stone, ancient mystery, jungle mist, cinematic" },
+        { ...COMMON_TECH_SPECS, s5: "Deserted Mall (버려진 쇼핑몰)", s0: "USA / Americas (미주)", s1: "Detroit Urban Decay (디트로이트)", s6: "Broken Glass (깨진 유리)", s9: "Gloomy (우울함)", s3: "7.판매시설", s4: "Shopping Mall", boost: "eerie quiet, broken escalator, rays of light through roof, nostalgia" },
+        { ...COMMON_TECH_SPECS, s5: "Post-Apocalyptic City (포스트 아포칼립스)", s0: "Europe (유럽)", s1: "Chernobyl Exclusion Zone (체르노빌)", s6: "Exposed Concrete (노출 콘크리트)", s9: "After the Rain (비 온 뒤)", s3: "2.공동주택", s4: "Apartment Complex", boost: "abandoned life, empty playground, cold atmosphere, realistic decay" },
+        { ...COMMON_TECH_SPECS, s5: "Ancient Colosseum (고대 콜로세움)", s0: "Europe (유럽)", s1: "Rome Colosseum Area (로마)", s6: "Travertine (트래버틴)", s9: "Moonlight (달빛)", s3: "5.문화및집회시설", s4: "Art Gallery", boost: "historical ruins under stars, cinematic night, dramatic heritage" }
+    ],
+
+    // 🌌 SPACE (우주 식민지)
+    'space': [
+        { ...COMMON_TECH_SPECS, s5: "Mars Colony Hub (화성 기지)", s0: "Sci-Fi / Space (우주)", s1: "Mars Colony (화성)", s6: "Titanium Panel (티타늄 패널)", s9: "High Noon (정오)", s3: "10.교육연구시설", s4: "Research Center", boost: "red dust, futuristic domes, harsh terrain, interplanetary life" },
+        { ...COMMON_TECH_SPECS, s5: "Asteroid Mining Base (소행성 기지)", s0: "Sci-Fi / Space (우주)", s1: "Space Station Module (우주 기지)", s6: "Carbon Fiber (카본 파이버)", s9: "Starlight (별빛)", s3: "17.공장", s4: "Manufacturing Plant", boost: "industrial space, massive machinery, dark vacuum of space, metallic" },
+        { ...COMMON_TECH_SPECS, s5: "Lunar Resort (달 리조트)", s0: "Sci-Fi / Space (우주)", s1: "Moon Surface Base (달 기지)", s6: "White Stucco (화이트 스타코)", s9: "Earth-Rise (지구 뜨기)", s3: "15.숙박시설", s4: "Luxury Hotel", boost: "clean white pods, looking back at earth, soft interior glow, futuristic" },
+        { ...COMMON_TECH_SPECS, s5: "Interstellar Library (인터스텔라 도서관)", s0: "Sci-Fi / Space (우주)", s1: "Cloud City (공중 도시)", s6: "Dichroic Glass (다이크로익 유리)", s9: "Starry Night (별밤)", s3: "10.교육연구시설", s4: "Large Library", boost: "infinite books, floating archives, nebular view through glass" },
+        { ...COMMON_TECH_SPECS, s5: "Titan Base (타이탄 기지)", s0: "Sci-Fi / Space (우주)", s1: "Mars Colony (화성)", s6: "Smart Glass (스마트 글라스)", s9: "Foggy Season (안개 시즌)", s3: "23.교정및군사시설", s4: "Military Bunker", boost: "thick methane atmosphere, glowing orange light, heavy duty architecture" }
+    ],
+
+    // 🐠 UNDERWATER (수중 도시)
+    'underwater': [
+        { ...COMMON_TECH_SPECS, s5: "Coral Hub (산호 허브)", s0: "Nature / Wild (대자연)", s1: "Underwater City (수중 도시)", s6: "Thick Glass (두꺼운 유리)", s19: "Coral Reef (산호초)", s9: "Deep Night (심야)", s3: "5.문화및집회시설", s4: "Museum", boost: "bioluminescent sea life, coral gardens, caustic light effects, deep blue" },
+        { ...COMMON_TECH_SPECS, s5: "Deep-Sea Lab (심해 실험실)", s0: "Nature / Wild (대자연)", s1: "Underwater City (수중 도시)", s6: "Titanium Panel (티타늄 패널)", s9: "Midnight (자정)", s3: "10.교육연구시설", s4: "Research Center", boost: "high pressure design, glowing submarine windows, floating bubbles" },
+        { ...COMMON_TECH_SPECS, s5: "Sub-Villa (수중 빌라)", s0: "Nature / Wild (대자연)", s1: "Maldives Overwater (몰디브)", s6: "Smart Glass (스마트 글라스)", s9: "Night (밤)", s3: "1.단독주택", s4: "Detached House", boost: "bedroom under the sea, shark swimming by, peaceful underwater world" },
+        { ...COMMON_TECH_SPECS, s5: "Ocean Floor Mall (해저 쇼핑몰)", s0: "Nature / Wild (대자연)", s1: "Underwater City (수중 도시)", s6: "Steel and Glass (강철과 유리)", s9: "Midday Sun (한낮)", s3: "7.판매시설", s4: "Shopping Mall", boost: "rays of sunlight through water, aquatic plants, grand underwater dome" },
+        { ...COMMON_TECH_SPECS, s5: "Bioluminescent Dome (발광 돔)", s0: "Nature / Wild (대자연)", s1: "Underwater City (수중 도시)", s6: "Fiberglass (유리섬유)", s9: "Deep Night (심야)", s3: "16.위락시설", s4: "Amusement Park", boost: "avatar sea style, glowing flora, magical underwater vibe, high-fidelity" }
     ]
 };
 
@@ -467,35 +426,92 @@ app.get('/api/preset/:themeKey', (req, res) => {
     }
 });
 
-app.post('/api/generate', (req, res) => {
-    const { choices, themeBoost } = req.body;
-    const getV = (k) => choices[k] ? choices[k].replace(/\(.*\)/, "").trim() : "";
+// ==========================================================================
+// 3. SECURE API CONFIGURATION (보안 API 설정)
+// ==========================================================================
 
-    const subject = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean).join(" ");
-    const mat = [getV('s6'), getV('s23')].filter(Boolean).join(" and ");
-    const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean).join(", specifically ");
-    const atmo = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean).join(", ");
-    const density = [getV('s25'), getV('s29'), getV('s28'), getV('s13')].filter(Boolean).join(", ");
-    const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean).join(", ");
-    
-    let prompt = `A professional architectural photograph of Create a highly detailed, photorealistic architectural image of a ${subject}. `;
-    if(mat) prompt += `The structure is constructed primarily of ${mat}. `;
-    if(env) prompt += `It is situated in ${env}. `;
-    if(density) prompt += `The scene features ${density}. `;
-    if(atmo) prompt += `The scene captures the atmosphere of ${atmo}. `;
-    if(tech) prompt += `The image should have the quality of ${tech}. `;
-    if(themeBoost) prompt += `Ensure the image reflects ${themeBoost}. `;
-    
-    prompt += `Render in 8k resolution, sharp focus, cinematic lighting, and architectural photography style.`;
-    
-    const ratio = getV('s18').replace("--ar ", "").replace(" (Standard)", "");
-    if(ratio) prompt += ` (Aspect Ratio: ${ratio})`;
+const { createClient } = require('@supabase/supabase-js');
 
-    prompt += `, Archdaily masterpiece, Architectural photography, Phase One IQ4, 150MP, sharp focus, magazine quality, clean composition, natural lighting --no text watermark logo signature blurry low-res words typography`;
+// 🔐 [SECURITY] Use Service Role Key in Render Environment Variables
+// [보안] Render 환경 변수에 SUPABASE_SERVICE_ROLE_KEY를 반드시 등록하세요.
+const sbAdmin = createClient(
+    process.env.SUPABASE_URL || 'https://oitqyfqzocjmubqmvzfw.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY // 마스터 비밀 키 (Master Secret Key)
+);
 
-    res.json({ result: prompt });
+// ==========================================================================
+// 4. INTEGRATED GENERATION API (통합된 보안 생성 API)
+// ==========================================================================
+
+app.post('/api/generate', async (req, res) => {
+    const { choices, themeBoost, userId } = req.body;
+
+    // 1. User Authentication Check (유저 인증 확인)
+    if (!userId) {
+        return res.status(401).json({ error: "Login required. (로그인이 필요합니다.)" });
+    }
+
+    try {
+        // 2. Server-side Credit Verification (서버에서 직접 크레딧 조회)
+        const { data: userData, error: userError } = await sbAdmin.auth.admin.getUserById(userId);
+        if (userError || !userData) {
+            return res.status(404).json({ error: "User not found. (사용자를 찾을 수 없습니다.)" });
+        }
+        
+        // 유저 메타데이터에서 크레딧 추출 (Extract credits from user metadata)
+        let credits = userData.user.user_metadata?.credits || 0;
+
+        // 3. Balance Check (잔액 확인)
+        if (credits <= 0) {
+            return res.status(403).json({ error: "No credits left. (크레딧이 부족합니다.)" });
+        }
+
+        // 4. Prompt Refinement Logic (프롬프트 데이터 정제)
+        // 괄호 안의 한글 설명을 제거하고 영어 키워드만 남깁니다. (Remove Korean text in brackets)
+        const getV = (k) => choices[k] ? choices[k].replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim() : "";
+
+        // 키워드 조합 (Keyword Assembly)
+        const subject = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean).join(" ");
+        const mat = [getV('s6'), getV('s23')].filter(Boolean).join(" and ");
+        const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean).join(", situated in ");
+        const atmo = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean).join(", ");
+        const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean).join(", ");
+        
+        // 5. Professional Prompt Construction (전문가용 프롬프트 빌딩)
+        let prompt = `**Professional architectural photography of a ${subject}**. `;
+        if(mat) prompt += `Materiality: Crafted from ${mat}. `;
+        if(env) prompt += `Context: Located in ${env}. `;
+        if(atmo) prompt += `Atmosphere: ${atmo}. `;
+        if(tech) prompt += `Tech Specs: ${tech}. `;
+        if(themeBoost) prompt += `\n**Style Boost**: ${themeBoost}. `;
+        
+        // AI 파라미터 및 품질 태그 (AI Parameters & Quality Tags)
+        prompt += `\n--v 6.1 --style raw --ar ${getV('s18').replace("--ar ", "") || "1:1"} --q 2 --stylize 250`;
+        prompt += `\nArchdaily masterpiece, sharp focus, magazine quality, clean composition, natural lighting --no text logo signature blurry words`;
+
+        // 6. Secure Credit Deduction (서버에서 안전하게 크레딧 1 차감)
+        const { error: updateError } = await sbAdmin.auth.admin.updateUserById(userId, {
+            user_metadata: { credits: credits - 1 }
+        });
+
+        if (updateError) throw updateError;
+
+        // 7. Return Result & Remaining Balance (결과 및 남은 잔액 반환)
+        res.json({ 
+            result: prompt, 
+            remainingCredits: credits - 1 
+        });
+
+    } catch (err) {
+        console.error("Server Error:", err);
+        res.status(500).json({ error: "Server error occurred. (서버 오류가 발생했습니다.)" });
+    }
 });
 
+// ==========================================================================
+// 5. SERVER START (서버 시작)
+// ==========================================================================
+
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`🚀 MY ARCHITECT PRO Server running on port ${port}`);
 });
