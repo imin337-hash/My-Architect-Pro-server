@@ -8,7 +8,6 @@ app.use(cors());
 app.use(express.json());
 
 // 🔐 [SECURITY] Supabase Admin 설정
-// Render의 Environment Variables에 이 값들이 없으면 서버가 시작되지 않습니다.
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -16,11 +15,10 @@ if (!supabaseUrl || !supabaseKey) {
     console.error("❌ CRITICAL ERROR: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing.");
 }
 
-// Service Role Key를 사용하므로 모든 테이블(profiles 포함)에 접근 권한이 있습니다.
 const sbAdmin = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 // ==========================================================================
-// 1. DATA_SHEET (누락 없는 전체 데이터)
+// 1. DATA_SHEET (데이터 시트)
 // ==========================================================================
 const DATA_SHEET = {
     "config": { "masters": [] },
@@ -443,7 +441,6 @@ app.post('/api/charge-success', async (req, res) => {
     }
 
     try {
-        // 1. 'profiles' 테이블에서 유저 조회 (없으면 생성)
         const { data: profile, error: fetchError } = await sbAdmin
             .from('profiles')
             .select('credits')
@@ -454,7 +451,6 @@ app.post('/api/charge-success', async (req, res) => {
 
         if (fetchError || !profile) {
             console.log("Profile not found, creating new profile...");
-            // 프로필이 없으면 0으로 시작
             currentCredits = 0;
             const { error: insertError } = await sbAdmin.from('profiles').upsert([{ id: userId, credits: 0 }]);
             if(insertError) throw insertError;
@@ -462,11 +458,9 @@ app.post('/api/charge-success', async (req, res) => {
             currentCredits = profile.credits;
         }
 
-        // 2. 크레딧 계산 (2000원 = 100 Credits)
         const addCredits = Math.floor(amount / 20); 
         const newCredits = currentCredits + addCredits;
 
-        // 3. 'profiles' 테이블 업데이트
         const { error: updateError } = await sbAdmin
             .from('profiles')
             .update({ credits: newCredits })
@@ -490,7 +484,6 @@ app.post('/api/charge-success', async (req, res) => {
 app.post('/api/generate', async (req, res) => {
     const { choices, themeBoost, userId } = req.body;
 
-    // 1. 유저 인증 확인
     if (!userId) {
         return res.status(401).json({ error: "Login required." });
     }
@@ -502,7 +495,6 @@ app.post('/api/generate', async (req, res) => {
     }
 
     try {
-        // 2. 'profiles' 테이블에서 현재 크레딧 조회 (진짜 장부 확인)
         const { data: userProfile, error: fetchError } = await sbAdmin
             .from('profiles')
             .select('credits')
@@ -515,29 +507,22 @@ app.post('/api/generate', async (req, res) => {
         
         const credits = userProfile.credits;
 
-        // 3. 잔액 확인
         if (credits < 1) {
             return res.status(403).json({ error: "No credits left. Please Upgrade. (크레딧 부족)" });
         }
 
-        // 4. 프롬프트 생성 로직 실행
         const prompt = generatePromptLogic(choices, themeBoost);
 
-        // 5. 'profiles' 테이블에서 크레딧 1 차감 (진짜 장부 수정)
         const newCreditBalance = credits - 1;
         const { error: updateError } = await sbAdmin
             .from('profiles')
             .update({ credits: newCreditBalance })
             .eq('id', userId);
 
-        if (updateError) {
-            console.error("Credit update failed:", updateError);
-            throw updateError;
-        }
+        if (updateError) throw updateError;
 
         console.log(`✂️ Credit Deducted: User ${userId} (${credits} -> ${newCreditBalance})`);
 
-        // 6. 결과 반환
         res.json({ 
             result: prompt, 
             remainingCredits: newCreditBalance 
@@ -549,29 +534,47 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-// [헬퍼 함수] 프롬프트 조합 로직
+// 💎 [V15.6 FIX] 모든 선택 옵션(밀도, 날씨, 디테일 등)을 완벽하게 반영하는 프롬프트 생성 로직
 function generatePromptLogic(choices, themeBoost) {
     const getV = (k) => choices[k] ? choices[k].replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim() : "";
 
-    const subject = [getV('s24'), getV('s5'), getV('s3'), getV('s4'), getV('s8'), getV('s7')].filter(Boolean).join(" ");
-    const mat = [getV('s6'), getV('s23')].filter(Boolean).join(" and ");
-    const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s27'), getV('s20')].filter(Boolean).join(", situated in ");
-    const atmo = [getV('s9'), getV('s10'), getV('s21'), getV('s17'), getV('s11')].filter(Boolean).join(", ");
-    const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')].filter(Boolean).join(", ");
+    // A. SUBJECT: 건물 정의 (s3는 제외됨)
+    const subject = [getV('s24'), getV('s5'), getV('s4'), getV('s8'), getV('s7'), getV('s23')]
+        .filter(Boolean).join(", ");
+
+    // B. ENVIRONMENT: 위치 및 배경
+    const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s20')]
+        .filter(Boolean).join(", situated in ");
+
+    // C. DENSITY & LIFE: 사람, 차량, 자연 밀도 (이전 버전 누락 수정)
+    const density = [getV('s27'), getV('s28'), getV('s29'), getV('s25'), getV('s13')]
+        .filter(Boolean).join(", ");
+
+    // D. ATMOSPHERE: 날씨 및 시간
+    const atmo = [getV('s21'), getV('s9'), getV('s10'), getV('s17'), getV('s11')]
+        .filter(Boolean).join(", ");
+
+    // E. TECH SPECS
+    const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')]
+        .filter(Boolean).join(", ");
     
-    let prompt = `**Professional architectural photography of a ${subject}**. `;
-    if(mat) prompt += `Materiality: Crafted from ${mat}. `;
-    if(env) prompt += `Context: Located in ${env}. `;
+    // 최종 조립
+    let prompt = `**Professional architectural photography of ${subject}**. `;
+    
+    if(getV('s6')) prompt += `Main Material: Crafted primarily from ${getV('s6')}. `;
+    if(env) prompt += `Context & Site: Located in ${env}. `;
+    if(density) prompt += `Life & Density: ${density}. `; // ✨ 핵심 추가 사항
     if(atmo) prompt += `Atmosphere: ${atmo}. `;
-    if(tech) prompt += `Tech Specs: ${tech}. `;
+    if(tech) prompt += `Technical: ${tech}. `;
+    
     if(themeBoost) prompt += `\n**Style Boost**: ${themeBoost}. `;
     
-    prompt += `\n--v 6.1 --style raw --ar ${getV('s18').replace("--ar ", "") || "1:1"} --q 2 --stylize 250`;
-    prompt += `\nArchdaily masterpiece, sharp focus, magazine quality, clean composition, natural lighting --no text logo signature blurry words`;
+    prompt += `\n--ar ${getV('s18').replace("--ar ", "") || "1:1"} --v 6.1 --style raw --q 2 --stylize 250`;
+    prompt += `\nArchdaily masterpiece, sharp focus, magazine quality, clean composition, natural lighting, ultra-detailed --no text logo signature blurry words`;
     
     return prompt;
 }
 
 app.listen(port, () => {
-    console.log(`🚀 MY ARCHITECT PRO Server (v15.6 - DB Sync Fixed) running on port ${port}`);
+    console.log(`🚀 MY ARCHITECT PRO Server (v15.6 - Fully Optimized) running on port ${port}`);
 });
