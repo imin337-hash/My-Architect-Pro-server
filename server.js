@@ -254,13 +254,48 @@ const DATA_SHEET = {
         "talking (대화하는)", "laughing (웃는)", "arguing (말다툼하는)", "hugging (포옹하는)", "kissing (키스하는)", "holding hands (손잡고 있는)", "waving (손 흔드는)", "cheering (환호하는)", 
         "taking photos (사진 찍는)", "taking selfie (셀카 찍는)", "eating (먹는)", "drinking (마시는)", "shopping (쇼핑하는)", "working (일하는)", "selling (파는)", "playing music (연주하는)", "dancing (춤추는)", "painting (그림 그리는)", "walking dog (개 산책시키는)"
     ],
-    "rep": ["Hyper-realistic Photo (극사실 사진)", "Unreal Engine 5", "Architectural Photography", "Cinematic Still"],
-    "engine": ["Unreal Engine 5.5", "V-Ray 6", "Midjourney V6.1", "Octane Render"],
-    "view": ["Eye-level (눈높이)", "Low Angle", "Aerial View", "Drone Shot", "Isometric"],
-    "lens": ["35mm Lens (표준 광각)", "24mm Wide", "50mm Prime", "85mm Portrait", "Tilt-Shift"],
+    "rep": [
+        "Hyper-realistic Photo (극사실 사진)", "3D Render (3D 렌더)", "White Model (화이트 모델)", "Clay Render (클레이 렌더)", "Architectural Photography (건축 사진)", 
+        "Watercolor (수채화)", "Oil Painting (유화)", "Acrylic Painting (아크릴화)", "Pencil Sketch (연필 스케치)", "Charcoal Sketch (숯 드로잉)", "Pen and Ink (펜화)", "Marker Sketch (마카 스케치)", "Colored Pencil (색연필화)", "Ink Wash Painting (수묵화)", "Impressionism (인상파)", 
+        "Digital Painting (디지털 페인팅)", "Concept Art (컨셉 아트)", "Matte Painting (매트 페인팅)", "Vector Art (벡터 아트)", "Pixel Art (픽셀 아트)", "Voxel Art (복셀 아트)", "Low Poly Art (로우 폴리)", "Anime Style (애니메이션 스타일)", "Studio Ghibli Style (지브리 스타일)", "Cyberpunk Style (사이버펑크 스타일)", 
+        "Blueprint (청사진)", "Technical Drawing (기술 도면)", "Section Cut (단면도)", "Exploded Axonometric (분해 액소노메트릭)", "Elevation View (입면도)", "Plan View (평면도)", "Wireframe (와이어프레임)", "Point Cloud (점군 데이터)", "Thermal Imaging (열화상)", "X-Ray View (엑스레이)"
+    ],
+    "engine": [
+        "Unreal Engine 5.4", "Unreal Engine 5.5", "Unity 6", "Unity HDRP", "CryEngine", "NVIDIA Omniverse", 
+        "Octane Render 8K", "V-Ray 6", "Corona Render", "Redshift", "Arnold Render", "Maxwell Render", "Keyshot", "Cycles (Blender)", 
+        "Lumion 2024", "Twinmotion", "Enscape", "D5 Render", 
+        "Midjourney V6.1", "Stable Diffusion XL", "Stable Diffusion 3", "DALL-E 3", "Adobe Firefly", "Magnific AI", 
+        "Blender Eevee", "WebGL", "Three.js"
+    ],
+     "view": [
+        "Eye-level (눈높이)", "Human Eye View (사람 시점)", "Street Level (거리 높이)", 
+        "Low Angle (로우 앵글)", "Worm's-eye (앙시도)", "High Angle (하이 앵글)", "Bird's-eye (조감도)", "Aerial View (항공 뷰)", "Drone Shot (드론 샷)", "Satellite View (위성 뷰)", "Top-Down (수직 부감)", 
+        "Isometric (아이소)", "Perspective (투시도)", "One-point Perspective (1소점)", "Two-point Perspective (2소점)", "Elevation (입면)", "Sectional View (단면 뷰)", 
+        "Wide-angle (광각)", "Fish-eye (어안 렌즈)", "Panoramic (파노라마)", "360 Degree (360도)", "Close-up (클로즈업)", "Macro Shot (접사)", "Over-the-Shoulder (오버 더 숄더)", "POV (1인칭 시점)", 
+        "Dutch Angle (더치 앵글/기울기)", "Silhouette View (실루엣 뷰)", "Reflection View (반사 뷰)", "Framed View (프레임 뷰)", "Through the Window (창문 너머)"
+    ],
+    "lens": [
+        "35mm Lens (표준 광각)", "50mm Lens (표준)", "85mm Lens (인물용)", 
+        "14mm Lens (초광각)", "16mm Lens (초광각)", "24mm Lens (광각)", "Wide-angle Zoom (광각 줌)", 
+        "70mm Lens (준망원)", "100mm Lens (망원)", "135mm Lens (망원)", "200mm Lens (장망원)", "Telephoto Zoom (망원 줌)", 
+        "Macro Lens (매크로)", "Fish-eye Lens (어안)", "Tilt-shift Lens (틸트시프트)", "Anamorphic Lens (아나모픽)", "Cine Lens (시네마)", 
+        "f/1.8 (얕은 심도)", "f/2.8 (적당한 심도)", "f/8.0 (깊은 심도)", "Shallow Depth of Field (아웃포커싱)", "Deep of Field (팬포커스)", "Bokeh Effect (보케)", 
+        "Lens Flare (렌즈 플레어)", "Chromatic Aberration (색수차)", "Vignetting (비네팅)", "ISO 100 (저감도/깨끗함)", "ISO 3200 (그레인)"
+    ],
     "motion": ["Still Life (정적인)", "Long Exposure", "Motion Blur", "Time-lapse"],
-    "light": ["Natural Sunlight", "Soft Diffused", "Neon Lights", "Cinematic Lighting", "Volumetric Fog", "God Rays"],
-    "ratio": ["--ar 1:1 (Square)", "--ar 16:9", "--ar 4:3", "--ar 9:16"]
+    "light": [
+        "Natural Sunlight (자연광)", "Direct Sunlight (직사광)", "Diffused Light (확산광)", "Moonlight (달빛)", "Starlight (별빛)", 
+        "Golden Hour (골든아워)", "Blue Hour (블루아워)", "Warm Interior Glow (내부 조명)", "God Rays (빛내림)", "Volumetric Rays (틴달 현상)", "Atmospheric Perspective (대기 원근법)", 
+        "Neon Lights (네온)", "Streetlight (가로등)", "LED Light (LED)", "Fluorescent Light (형광등)", "Floodlight (투광 조명)", "Spotlight (스포트라이트)", 
+        "Soft Light (부드러운 빛)", "Hard Light (강한 빛)", "Rim Light (림 라이트/후광)", "Backlight (역광)", "Sidelight (측광)", "Softbox (소프트박스)", "Rembrandt Lighting (렘브란트 조명)", "Cinematic Lighting (영화 조명)", "Dramatic Chiaroscuro (명암대비)", 
+        "Bioluminescence (생체 발광)", "Firelight (불빛)", "Candlelight (촛불)", "Laser Light (레이저)", "Glow in the Dark (야광)"
+    ],
+    "ratio": [
+        "--ar 16:9 (Standard)", "--ar 3:2 (Photo)", "--ar 4:3 (Traditional)", "--ar 2:1 (Wide)", "--ar 2.35:1 (Cinema)", "--ar 32:9 (Super Wide)",
+        "--ar 9:16 (Story)", "--ar 2:3 (Portrait)", "--ar 3:4 (Social)", "--ar 4:5 (Insta)", "--ar 1:2 (Tall)", 
+        "--ar 1:1 (Square)", 
+        "--ar 16:10", "--ar 1.85:1", "--ar 1.43:1 (IMAX)"
+    ]
 };
 
 // 💎 모든 프리셋에 공통으로 적용될 Tech Specs
