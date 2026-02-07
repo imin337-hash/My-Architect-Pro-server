@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseKey) {
 const sbAdmin = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 // ==========================================================================
-// 1. DATA_SHEET (데이터 시트)
+// 1. DATA_SHEET (데이터 시트) - 기존 데이터 유지
 // ==========================================================================
 const DATA_SHEET = {
     "config": { "masters": [] },
@@ -534,47 +534,53 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-// 💎 [V15.6 FIX] 모든 선택 옵션(밀도, 날씨, 디테일 등)을 완벽하게 반영하는 프롬프트 생성 로직
+// 🍌 [V15.7 FIX] Nano Banana (Gemini) Optimized Prompt Logic
+// 기계적인 파라미터(--v, --style 등)를 제거하고 문장형(Natural Language)으로 변환
 function generatePromptLogic(choices, themeBoost) {
     const getV = (k) => choices[k] ? choices[k].replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim() : "";
 
-    // A. SUBJECT: 건물 정의 (s3는 제외됨)
+    // 1. Core Subject Definition
     const subject = [getV('s24'), getV('s5'), getV('s4'), getV('s8'), getV('s7'), getV('s23')]
         .filter(Boolean).join(", ");
 
-    // B. ENVIRONMENT: 위치 및 배경
+    // 2. Context & Environment
     const env = [getV('s0'), getV('s1'), getV('s2'), getV('s19'), getV('s20')]
         .filter(Boolean).join(", situated in ");
 
-    // C. DENSITY & LIFE: 사람, 차량, 자연 밀도 (이전 버전 누락 수정)
+    // 3. Life & Density
     const density = [getV('s27'), getV('s28'), getV('s29'), getV('s25'), getV('s13')]
         .filter(Boolean).join(", ");
 
-    // D. ATMOSPHERE: 날씨 및 시간
+    // 4. Atmosphere
     const atmo = [getV('s21'), getV('s9'), getV('s10'), getV('s17'), getV('s11')]
         .filter(Boolean).join(", ");
 
-    // E. TECH SPECS
+    // 5. Tech Specs
     const tech = [getV('s14'), getV('s15'), getV('s16'), getV('s22'), getV('s26')]
         .filter(Boolean).join(", ");
+
+    // 💎 Construct Prompt in Natural Language
+    let prompt = `Create a **professional architectural image** of ${subject || "a modern building"}.`;
+
+    if(getV('s6')) prompt += ` The structure is crafted primarily from ${getV('s6')}.`;
+    if(env) prompt += ` The scene is ${env}.`;
+    if(density) prompt += ` The setting features ${density}.`;
+    if(atmo) prompt += ` The atmosphere is characterized by ${atmo}.`;
+    if(tech) prompt += ` The image style represents ${tech}.`;
+
+    if(themeBoost) prompt += `\n\n**Artistic Style**: ${themeBoost}.`;
+
+    // Ratio Handling (Text Description)
+    const ratioStr = getV('s18').replace("--ar ", "") || "1:1";
     
-    // 최종 조립
-    let prompt = `**Professional architectural photography of ${subject}**. `;
-    
-    if(getV('s6')) prompt += `Main Material: Crafted primarily from ${getV('s6')}. `;
-    if(env) prompt += `Context & Site: Located in ${env}. `;
-    if(density) prompt += `Life & Density: ${density}. `; // ✨ 핵심 추가 사항
-    if(atmo) prompt += `Atmosphere: ${atmo}. `;
-    if(tech) prompt += `Technical: ${tech}. `;
-    
-    if(themeBoost) prompt += `\n**Style Boost**: ${themeBoost}. `;
-    
-    prompt += `\n--ar ${getV('s18').replace("--ar ", "") || "1:1"} --v 6.1 --style raw --q 2 --stylize 250`;
-    prompt += `\nArchdaily masterpiece, sharp focus, magazine quality, clean composition, natural lighting, ultra-detailed --no text logo signature blurry words`;
-    
+    // Requirements (For Gemini/Imagen)
+    prompt += `\n\n**Requirements**: High resolution, 8k, photorealistic, architectural photography masterpiece, sharp focus, magazine quality.`;
+    prompt += `\n**Constraints**: Do not include any text, watermarks, logos, signatures, or blurred subjects in the final image.`;
+    prompt += `\n(Target Aspect Ratio: ${ratioStr})`;
+
     return prompt;
 }
 
 app.listen(port, () => {
-    console.log(`🚀 MY ARCHITECT PRO Server (v15.6 - Fully Optimized) running on port ${port}`);
+    console.log(`🚀 MY ARCHITECT PRO Server (v15.7 - Nano Banana Optimized) running on port ${port}`);
 });
