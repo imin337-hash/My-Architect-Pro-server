@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseKey) {
 const sbAdmin = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 // ==========================================================================
-// 1. DATA_SHEET (데이터 시트) - 기존 데이터 유지
+// 1. DATA_SHEET (데이터 시트)
 // ==========================================================================
 const DATA_SHEET = {
     "config": { "masters": [] },
@@ -469,48 +469,78 @@ app.get('/api/preset/:themeKey', (req, res) => {
 // ==========================================================================
 
 app.post('/api/charge-success', async (req, res) => {
-    const { userId, amount } = req.body;
+    // 클라이언트에서 creditsToAdd(충전할 크레딧), daysToAdd(연장할 일수)를 받음
+    const { userId, amount, creditsToAdd, daysToAdd } = req.body;
 
     if (!userId || !amount) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
+        // 1. 현재 유저 정보 가져오기
         const { data: profile, error: fetchError } = await sbAdmin
             .from('profiles')
-            .select('credits')
+            .select('credits, valid_until') // valid_until 추가 조회
             .eq('id', userId)
             .single();
 
         let currentCredits = 0;
+        let currentExpiry = null;
 
+        // 프로필이 없으면 생성
         if (fetchError || !profile) {
             console.log("Profile not found, creating new profile...");
-            currentCredits = 0;
+            // 초기 생성 시 만료일은 없음(또는 결제 시점부터 설정)
             const { error: insertError } = await sbAdmin.from('profiles').upsert([{ id: userId, credits: 0 }]);
             if(insertError) throw insertError;
         } else {
-            currentCredits = profile.credits;
+            currentCredits = profile.credits || 0;
+            currentExpiry = profile.valid_until;
         }
 
-        const addCredits = Math.floor(amount / 20); 
-        const newCredits = currentCredits + addCredits;
+        // 2. 크레딧 계산
+        // 클라이언트가 명확히 creditsToAdd를 보냈다면 그걸 사용, 아니면 기존 로직(예비용)
+        const addedCredits = creditsToAdd ? parseInt(creditsToAdd) : Math.floor(amount / 20);
+        const newCredits = currentCredits + addedCredits;
 
+        // 3. 유효기간(Expiry Date) 계산
+        const addedDays = daysToAdd ? parseInt(daysToAdd) : 30; // 기본 30일
+        let newExpiryDate = new Date(); // 기본은 '오늘'
+
+        if (currentExpiry) {
+            const currentExpiryDate = new Date(currentExpiry);
+            // 만약 현재 유효기간이 미래라면(아직 남았다면) -> 거기서부터 연장
+            if (currentExpiryDate > new Date()) {
+                newExpiryDate = currentExpiryDate;
+            }
+            // 만약 이미 지났다면 -> 오늘부터 연장 (위에서 new Date()로 초기화됨)
+        }
+
+        // 날짜 더하기
+        newExpiryDate.setDate(newExpiryDate.getDate() + addedDays);
+
+        // 4. DB 업데이트 (크레딧 + 유효기간)
         const { error: updateError } = await sbAdmin
             .from('profiles')
-            .update({ credits: newCredits })
+            .update({ 
+                credits: newCredits,
+                valid_until: newExpiryDate.toISOString() // 타임스탬프 저장
+            })
             .eq('id', userId);
 
         if (updateError) throw updateError;
 
-        console.log(`✅ Charged DB: User ${userId} (+${addCredits} => Total ${newCredits})`);
-        res.json({ success: true, newCredits });
+        console.log(`✅ Charged: User ${userId} (+${addedCredits} Cr, +${addedDays} Days)`);
+        console.log(`   └ New Balance: ${newCredits}, Valid Until: ${newExpiryDate.toISOString()}`);
+
+        res.json({ success: true, newCredits, newExpiry: newExpiryDate });
 
     } catch (err) {
         console.error("Charge Error:", err);
         res.status(500).json({ error: "Failed to charge credits" });
     }
 });
+
 
 // ==========================================================================
 // 4. GENERATION API (생성 및 차감 - DB 'profiles' 연동)
@@ -530,9 +560,10 @@ app.post('/api/generate', async (req, res) => {
     }
 
     try {
+        // 유효기간(valid_until)도 같이 조회
         const { data: userProfile, error: fetchError } = await sbAdmin
             .from('profiles')
-            .select('credits')
+            .select('credits, valid_until')
             .eq('id', userId)
             .single();
 
@@ -541,13 +572,25 @@ app.post('/api/generate', async (req, res) => {
         }
         
         const credits = userProfile.credits;
+        const validUntil = userProfile.valid_until;
 
+        // 1. 유효기간 체크 (서버 사이드 보안)
+        if (validUntil) {
+            const expiryDate = new Date(validUntil);
+            const now = new Date();
+            if (expiryDate < now) {
+                return res.status(403).json({ error: "Membership Expired. Please Upgrade." });
+            }
+        }
+
+        // 2. 크레딧 체크
         if (credits < 1) {
-            return res.status(403).json({ error: "No credits left. Please Upgrade. (크레딧 부족)" });
+            return res.status(403).json({ error: "No credits left. Please Upgrade." });
         }
 
         const prompt = generatePromptLogic(choices, themeBoost);
 
+        // 크레딧 차감
         const newCreditBalance = credits - 1;
         const { error: updateError } = await sbAdmin
             .from('profiles')
@@ -556,7 +599,7 @@ app.post('/api/generate', async (req, res) => {
 
         if (updateError) throw updateError;
 
-        console.log(`✂️ Credit Deducted: User ${userId} (${credits} -> ${newCreditBalance})`);
+        console.log(`✂️ Generated: User ${userId} (${credits} -> ${newCreditBalance})`);
 
         res.json({ 
             result: prompt, 
@@ -570,7 +613,6 @@ app.post('/api/generate', async (req, res) => {
 });
 
 // 🍌 [V15.7 FIX] Nano Banana (Gemini) Optimized Prompt Logic
-// 기계적인 파라미터(--v, --style 등)를 제거하고 문장형(Natural Language)으로 변환
 function generatePromptLogic(choices, themeBoost) {
     const getV = (k) => choices[k] ? choices[k].replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim() : "";
 
@@ -606,7 +648,7 @@ function generatePromptLogic(choices, themeBoost) {
     if(themeBoost) prompt += `\n\n**Artistic Style**: ${themeBoost}.`;
 
     // Ratio Handling (Text Description)
-    const ratioStr = getV('s18').replace("--ar ", "") || "1:1";
+    const ratioStr = getV('s18') ? getV('s18').replace("--ar ", "") : "1:1";
     
     // Requirements (For Gemini/Imagen)
     prompt += `\n\n**Requirements**: High resolution, 8k, photorealistic, architectural photography masterpiece, sharp focus, magazine quality.`;
@@ -617,5 +659,5 @@ function generatePromptLogic(choices, themeBoost) {
 }
 
 app.listen(port, () => {
-    console.log(`🚀 MY ARCHITECT PRO Server (v15.7 - Nano Banana Optimized) running on port ${port}`);
+    console.log(`🚀 MY ARCHITECT PRO Server (v16.0 - Payment Updated) running on port ${port}`);
 });
